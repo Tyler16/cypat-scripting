@@ -41,9 +41,16 @@ read -p "> " OS
 while [ true ]
 do
   echo "Choose a task"
-  echo "1. End Script"
+  echo "1. Updates"
+  echo "2. End Script"
   read -p "> " task
   if [ $task = "1" ]
+  then
+    apt-get update
+    apt-get upgrade
+    apt-get dist-upgrade
+  fi
+  elif [ $task = "2" ]
   then
     exit
   fi
