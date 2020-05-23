@@ -38,19 +38,100 @@ echo "2. Ubuntu 14"
 echo "3. Debian"
 read -p "> " OS
 
+read -p "What is your username? " mainUser
+
 while [ true ]
 do
+  clear
   echo "Choose a task"
-  echo "1. Updates"
-  echo "2. End Script"
+  echo "1. Users and Passwords"
+  echo "2. Updates"
+  echo "3. Network Security"
+  echo "4. Package Management"
+  echo "5. Auditing"
+  echo "6. End Script"
   read -p "> " task
   if [ $task = "1" ]
   then
-    apt-get update
-    apt-get upgrade
-    apt-get dist-upgrade
+    read -p "Use ReadMe for users? (y/n) " readmeUsers
+    if [ $readmeUsers = "y" ]
+    then
+      echo "ReadMe user system not created yet."
+    fi
+    elif [ $readmeUsers = "n" ]
+    then
+      read -ap "Enter all users in readme with a single space in between each user."
+    fi
+    else
+      echo "Invalid response, skipping user removal"
+    fi
+    
+    read -p "Are there any users that need to be added? (y/n) " newUser
+    if [ $newUser = "y" ]
+    then
+      read -ap "Enter usernames of users that need to be created with a single space seperating each user: " newUsers
+      for user in "${newUsers[@]}"
+      do
+        adduser $user
+      done
+    fi
+    
+    read -p "Are there any new groups that need to be created? (y/n) " newGroup
+    if [ $newGroup = "y" ]
+    then
+      read -ap "Enter all groups that need to be created with a single space seperating each group: " newGroupNames
+      for group in "${newGroupNames[@]}"
+      do
+        addgroup $group
+        read -ap "Enter users that belong in ${group} with a single space seperating each user: " groupUsers
+        for user in "${groupUsers[@]}"
+        do
+          adduser $user $group
+        done
+      done
+    fi
   fi
   elif [ $task = "2" ]
+  then
+    read -p "Do updates now? (y/n) " updatePrompt
+    if [ $updatePrompt = "y" ]
+    then
+      echo "Updating, this might take a while"
+      apt-get update
+      apt-get upgrade -y
+      apt-get dist-upgrade -y
+    fi
+  fi
+  elif [ $task = "3" ]
+  then
+    apt-get install ufw
+    apt-get install iptables
+    ufw enable
+  fi
+  elif [ $task = "4" ]
+  then
+    read -p "Are there any extra packages that need to be installed? (y/n) " packagePrompt
+    if [ packagePrompt="y" ]
+    then
+      read -ap "Enter all packages that need to be created with a single space seperating each group: " packages
+      for package in "${packages[@]}"
+      do
+        apt-get install $package
+      done
+      
+      echo "Removing hacking tools"
+      apt-get purge aircrack-ng apktool crack crack-common crack-md5 fcrackzip hashcat hydra* irpas john* *kismet* lcrack *netcat* ncat nginx *nmap* ophcrack* *macchanger* pdfcrack pixiewps rarcrack sbd sipcrack socat sock socket sucrack wireshark yersinia
+      
+      echo "Removing games"
+      apt-get purge 0ad* 2048-qt 4digit 7kaa* a7xpg* abe* aajm acm ace-of-penguins adanaxisgpl* adonthell* airstrike* aisleriot alex4* alien-arena* alienblaster* amoebax* amphetamine* an anagramarama* angband* angrydd animals antigravitaattori ardentryst armagetronad* asc asc-data asc-music ascii-jump assultcube* astromenace* asylum* atanks* atom4 atomic* attal* auralquiz balder2d* ballerburg ballz* bambam barrage bastet bb bear-factory beneath-a-steel-sky berusky* between billard* biloba* biniax2* black-box blobandconquer* blobby* bloboats blobwars* blockattack blockout2 blocks-of-the-undead* bombardier bomber bomberclone* boswars* bouncy bovo brainparty* briquolo* bsdgames* btanks* bubbros bugsquish bumprace* burgerspace bve* openbve* bygfoot* bzflag* cappuccino cardstories castle-combat cavezofphear ceferino* cgoban *chess* childsplay* chipw chocolate* chromium-bsu* circuslinux* colobot* colorcode connectagram* cookietool *cowsay* crack-attack crafty* crawl* crimson criticalmass* crossfire* crrcism* csmash* cube2* cultivation curseofwar cutemaze cuyo* cyphesis-cpp* cytadela* *x-rebirth dangen darkplaces* dds deal dealer defendguin* desmume deutex dhewm3* dizzy dodgindiamond2 dolphin-emu* doom-wad-shareware doomsday* dopewars* dossizola* drascula* dvorak7min eboard* edgar* efp einstein ember-media empire* endless-sky* enemylines* enigma* epiphany* etoys etw* excellent-bifurcation extremetuxracer* exult* fairymax fb-music-high ffrenzy fgo fgrun fheroes2-pkg filler fillets-ng* filters five-or-more fizmo* flare* flight-of-the-amazon-queen flightgear* flobopuyo fltk1.1-games fltk1.3-games fofix foobillard* fortune* four-in-a-row freealchemist freecell-solver-bin freeciv* freecol freedink* freedm freedoom freedroid* freegish freeorion* freespace2* freesweep freetennis* freevial fretsonfire* frobtads frogatto frotz frozen-bubble* fruit funguloids* funnyboat gamazons game-data-packager gameclock gamine* garden-of-coloured-lights* gargoyle-free gav* gbrainy gcompris* gearhead* geekcode geki* gemdropx gemrb* geneatd gfceu gfpoken gl-117* glaurung glhack glines glob2* glpeces* gltron gmult gnect gnibbles gnobots2 gnome-breakout gnome-cards-data gnome-hearts gnome-klotski gnome-mahjongg gnome-mastermind gnome-mines gnome-nibbles gnome-robots gnome-sudoku gnome-tetravex gnomine gnotravex gnotski gnubg* gnubik gnuboy* gnudoq gnugo gnujump* gnuminishogi gnurobbo* gnurobots gnushogi golly gomoko.app gplanarity gpsshogi* granatier granule gravitation gravitywars greed grhino grhino-data gridlock.app groundhog gsalliere gtali gtans gtkballs gtkboard gtkboard gtkpool gunroar* gvrng gweled hachu hannah* hearse hedgewars* heroes* hex-a-hop hexalate hexxagon higan hitori hoichess holdingnuts holotz-castle* hyperrogue* iagno icebreaker ii-esu ifon instead* ioquake3 jester jigzo* jmdlx jumpnbump* jzip kajongg kanagram kanatest kapman katomic kawari8 kball* kblackbox kblocks kbounce kbreakout kcheckers kdegames* kdiamond ketm* kfourinline kgoldrunner khangman kigo kiki-the-nano-bot* kildclient killbots kiriki kjumpingcube klickety klines kmahjongg kmines knavalbattle knetwalk knights kobodeluxe* kolf kollision komi konquest koules kpat krank kraptor* kreversi kshisen ksirk ksnakeduel kspaceduel ksquares ksudoku ktuberling kubrick laby late* lbreakout2* lgc-pg lgeneral* libatlas-cpp-0.6-tools libgemrb libretro-nestopia lierolibre* lightsoff lightyears lincity* linthesia liquidwar* littlewizard* llk-linux lmarbles lmemory lolcat londonlaw lordsawar* love* lskat ltris luola* lure-of-the-temptress macopix-gtk2 madbomber* maelstrom magicmaze magicor* magictouch mah-jong mahjongg mame* manaplus* mancala marsshooter* matanza mazeofgalious* mednafen megaglest* meritous* mess* mgt miceamaze micropolis* minetest* mirrormagic* mokomaze monopd monster-masher monsterz* moon-buggy* moon-lander* moria morris mousetrap mrrescue mttroff mu-cade* mudlet multitet mupen64plus* nestopia nethack* netmaze netpanzer* netris nettoe neverball* neverputt* nexuiz* nikiwi* ninix-aya ninvaders njam* noiz2sa* nsnake numptyphysics ogamesim* omega-rpg oneisenough oneko onscripter oolite* open-invaders* openarena* opencity* openclonk* openlugaru* openmw* openpref openssn* openttd* opentyrian openyahtzee orbital-eunuchs-sniper* out-of-order overgod* pachi pacman* palapeli* pangzero parsec47* passage pathogen pathological pax-britannica* pcsx2 pcsxr peg-e peg-solitaire pegsolitaire penguin-command pente pentobi performous* pescetti petris pgn-extract phalanx phlipple* pianobooster picmi pinball* pingus* pink-pony* pioneers* pipenightdreams* pipwalker pixbros pixfrogger planarity plee-the-bear* pokerth* polygen* polyglot pong2 powder powermanga* pq prboom-plus* primrose projectl purity* pybik* pybridge* pykaraoke* pynagram pyracerz pyscrabble* pysiogame pysolfc* pysycache* python-pykaraoke python-renpy qgo qonk qstat qtads quadrapassel quake* quarry qxw rafkill* raincat* randtype rbdoom3bfg redeclipse* reminiscence renpy* residualvm* ri-li* rlvm robocode robotfindskitten rockdodger rocksndiamonds rolldice rott rrootage salliere sandboxgamemaker sauerbraten* scid* scorched3d* scottfree scummvm* sdl-ball* seahorse-adventures searchandrescue* sgt-puzzles shogivar* simutrans* singularity* sjaakii sjeng sl slashem* slimevolley* slingshot sludge-empire sm snake4 snowballz solarwolf sopwith spacearyarya spacezero speedpad spellcast sponc spout spring* starfighter* starvoyager* stax steam steamcmd stockfish stormbaancoureur* sudoku supertransball2* supertux* swell-foop tads3-common tagua* tali tanglet* tatan tdfsb tecnoballz* teeworlds* tenace tenmado tennix tetrinet* tetzle tf tf5 tictactoe-ng tint tintin++ tinymux titanion* toga2 tomatoes* tome toppler torcs* tourney-manager trackballs* transcend treil trigger-rally* triplane triplea trophy* tumiki-fighters* tuxfootball tuxmath* tuxpuck tuxtype* tworld* typespeed uci2wb ufoai* uhexen2* uligo unknown-horizons uqm* val-and-rick* vbaexpress vcmi vectoroids viruskiller visualboyadvance* vodovod warmux* warzone2100* wesnoth* whichwayisup widelands* wing* wizznic* wmpuzzle wolf4sdl wordplay wordwarvi* xabacus xball xbill xblast-tnt* xboard xbomb xbubble* xchain xdemineur xdesktopwaves xevil xfireworks xfishtank xflip xfrisk xgalaga* xgammon xinv3d xjig xjokes xjump xletters xmabacus xmahjongg xmile xmoto* xmountains xmpuzzles xonix xpat2 xpenguins xphoon xpilot* xpuzzles xqf xracer* xscavenger xscorch xscreensaver-screensaver-dizzy xshisen xshogi xskat xsok xsol xsoldier xstarfish xsystem35 xteddy xtron xvier xwelltris xword xye yahtzeesharp yamagi-quake2* zangband* zatacka zaz* zec zivot zoom-player
+    fi
+  fi
+  elif [ $task = "5" ]
+  then
+    apt-get install auditd
+    auditctl -e 1
+  fi
+  elif [ $task = "6" ]
   then
     exit
   fi
