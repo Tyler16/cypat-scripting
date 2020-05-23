@@ -142,7 +142,7 @@ do
   elif [ $task = "5" ]
   then
     read -p "Is SSH a critical service? (y/n) " SSHPrompt
-    if [ SSHPrompt = "y" ]
+    if [ $SSHPrompt = "y" ]
     then
       apt-get install ssh
       apt-get install openssh
@@ -155,8 +155,11 @@ do
       chown root:root /etc/ssh/sshd_config
       chmod 600 /etc/ssh/sshd_config
       chattr +ai /etc/ssh/sshd_config
+      mkdir ~/.ssh
+      chmod 700 ~/.ssh
+      ssh-keygen -t rsa
     fi
-    elif [ SSHPrompt = "n" ]
+    elif [ $SSHPrompt = "n" ]
     then
       apt-get purge ssh
       apt-get purge openssh
@@ -168,15 +171,68 @@ do
     fi
     
     read -p "Is FTP a critical service? (y/n) " FTPPrompt
-    if [ FTPPrompt = "y" ]
+    if [ $FTPPrompt = "y" ]
     then
+      apt-get purge *ftp*
       apt-get install ftp
       ufw allow ftp
       ufw allow sftp
+      echo "What FTP application is being used?"
+      echo "1. vsftpd"
+      echo "2. proftpd"
+      echo "3. pureftpd"
+      echo "4. other"
+      read -p "> " FTPApplication
+      if [ $FTPApplication = "1" ]
+      then
+      	apt-get install vsftpd
+	openssl req -x509 -nodes -keyout /etc/ssl/private/vsftpdkey.pem -out /etc/ssl/certs/vsftpdcert.pem -days 365 -newkey rsa:2048
+      	rewrite_file vsftpd.conf /etc/vsftpd.conf
+	chown root:root /etc/vsftpd.conf
+	chmod 600 /etc/vsftpd.conf
+	chattr +ai /etc/vsftpd.conf
+	chown root:root /etc/ssl/private/vsftpdkey.pem
+	chmod 600 /etc/ssl/private/vsftpdkey.pem
+	chattr +ai /etc/ssl/private/vsftpdkey.pem
+	chown root:root /etc/ssl/certs/vsftpdcert.pem
+	chmod 600 /etc/ssl/certs/vsftpdcert.pem
+	chattr +ai /etc/ssl/certs/vsftpdcert.pem
+      fi
+      elif [ $FTPApplication = "2" ]
+      then
+      	apt-get install proftpd-basic
+      	openssl req -x509 -nodes -keyout /etc/ssl/private/proftpdkey.pem -out /etc/ssl/certs/proftpdcert.pem -days 365 -newkey rsa:2048
+	rewrite_file tls.conf /etc/proftpd/tls.conf
+	rewrite_file proftpd.conf /etc/proftpd/proftpd.conf
+	chown root:root /etc/proftpd/proftpd.conf
+	chmod 600 /etc/proftpd/proftpd.conf
+	chattr +ai /etc/proftpd/proftpd.conf
+	chown root:root /etc/proftpd/tls.conf
+	chmod 600 /etc/proftpd/tls.conf
+	chattr +ai /etc/proftpd/tls.conf
+	chown root:root /etc/ssl/private/proftpdkey.pem
+	chmod 600 /etc/ssl/private/proftpdkey.pem
+	chattr +ai /etc/ssl/private/proftpdkey.pem
+	chown root:root /etc/ssl/certs/proftpdcert.pem
+	chmod 600 /etc/ssl/certs/proftpdcert.pem
+	chattr +ai /etc/ssl/certs/vsftpdcert.pem
+      fi
+      elif [ $FTPApplication = "3" ]
+      then
+      	apt-get install pure-ftpd
+      fi
+      elif [ $FTPApplication = "4" ]
+      then
+      	read -p "Enter application for FTP and search how to secure said application: " FTPapp
+	apt-get install $FTPapp
+      fi
+      else
+      	echo "Invalid option"
+      fi
     fi
-    elif [ FTPPrompt = "n" ]
+    elif [ $FTPPrompt = "n" ]
     then
-      apt-get purge ftp
+      apt-get purge *ftp*
       ufw deny ftp
       ufw deny sftp
     fi
@@ -185,14 +241,14 @@ do
     fi
     
     read -p "Is Apache a critical service? (y/n) " ApachePrompt
-    if [ ApachePrompt = "y" ]
+    if [ $ApachePrompt = "y" ]
     then
       apt-get install apache2
       ufw allow http
       ufw allow https
       rm -r /var/www/*
     fi
-    elif [ ApachePrompt = "n" ]
+    elif [ $ApachePrompt = "n" ]
       apt-get purge apache2
       ufw deny http
       ufw deny https
@@ -204,34 +260,34 @@ do
     fi
     
     read -p "Is Samba a critical service? (y/n) " SambaPrompt
-    if [ SambaPrompt = "y" ]
+    if [ $SambaPrompt = "y" ]
     then
       apt-get install samba
       ufw allow netbios-ns
-	    ufw allow netbios-dgm
-	    ufw allow netbios-ssn
-	    ufw allow microsoft-ds
+      ufw allow netbios-dgm
+      ufw allow netbios-ssn
+      ufw allow microsoft-ds
     fi
-    elif [ SambaPrompt = "n" ]
+    elif [ $SambaPrompt = "n" ]
     then
       apt-get purge samba*
       apt-get purge smb
       ufw deny netbios-ns
-	    ufw deny netbios-dgm
-	    ufw deny netbios-ssn
-	    ufw deny microsoft-ds
+      ufw deny netbios-dgm
+      ufw deny netbios-ssn
+      ufw deny microsoft-ds
     fi
     else
       echo "Invalid option"
     fi
     
     read -p "Is DNS a critical service? (y/n) " DNSPrompt
-    if [ DNSPrompt = "y" ]
+    if [ $DNSPrompt = "y" ]
     then
       apt-get install bind9
       ufw allow domain
     fi
-    elif [ DNSPrompt = "n" ]
+    elif [ $DNSPrompt = "n" ]
     then
       apt-get purge bind9
       ufw deny domain
@@ -241,10 +297,10 @@ do
     fi
     
     read -p "Is DHCP a critical service? (y/n) " DHCPPrompt
-    if [ DHCPPrompt = "y" ]
+    if [ $DHCPPrompt = "y" ]
     then
     fi
-    elif [ DHCPPrompt = "n" ]
+    elif [ $DHCPPrompt = "n" ]
     then
     fi
     else
@@ -252,10 +308,10 @@ do
     fi
     
     read -p "Is SQL a critical service? (y/n) " SQLPrompt
-    if [ SQLPrompt = "y" ]
+    if [ $SQLPrompt = "y" ]
     then
     fi
-    elif [ SQLPrompt = "n" ]
+    elif [ $SQLPrompt = "n" ]
     then
       apt-get purge mysql*
     fi
@@ -264,12 +320,12 @@ do
     fi
     
     read -p "Is Telnet a critical service? (y/n) " TelnetPrompt
-    if [ TelnetPrompt = "y" ]
+    if [ $TelnetPrompt = "y" ]
     then
       apt-get install telnet
       ufw allow telnet
     fi
-    elif [ TelnetPrompt = "n" ]
+    elif [ $TelnetPrompt = "n" ]
     then
       apt-get purge telnet
       ufw deny telnet
@@ -279,7 +335,7 @@ do
     fi
     
     read -p "Are mail services required? (y/n) " mailPrompt
-    if [ mailPrompt = "y" ]
+    if [ $mailPrompt = "y" ]
     then
       ufw allow smtp
       ufw allow pop2
@@ -288,7 +344,7 @@ do
       ufw allow imaps
       ufw allow pop3s
     fi
-    elif [ mailPrompt = "n" ]
+    elif [ $mailPrompt = "n" ]
     then
       ufw deny smtp
       ufw deny pop2
@@ -302,13 +358,13 @@ do
     fi
     
     read -p "Is printing required? (y/n) " printPrompt
-    if [ printPrompt = "y" ]
+    if [ $printPrompt = "y" ]
     then
       ufw allow ipp
       ufw allow cups
       ufw allow printer
     fi
-    elif [ printPrompt = "n" ]
+    elif [ $printPrompt = "n" ]
     then
       ufw deny ipp
       ufw deny cups
