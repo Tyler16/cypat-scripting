@@ -91,6 +91,18 @@ do
         done
       done
     fi
+    
+    echo "Setting Password Policies"
+    apt-get install libpam-cracklib
+    rewrite_file common-password /etc/pam.d/common-password
+    rewrite_file login.defs /etc/login.defs
+    rewrite_file common-auth /etc/pam.d/common-auth
+    chown root:root /etc/pam.d/common-password
+    chmod 600 /etc/pam.d/common-password
+    chown root:root /etc/login.defs
+    chmod 600 /etc/login.defs
+    chown root:root /etc/pam.d/common-auth
+    chmod 600 /etc/common-auth
   fi
   elif [ $task = "2" ]
   then
@@ -136,10 +148,17 @@ do
       apt-get install openssh
       apt-get install openssh-server
       ufw allow ssh
+      rewrite_file sshd_config /etc/ssh/sshd_config
+      read -ap "Enter users that need SSH access with a single space seperating each user: " sshUsers
+      echo "AllowUsers $sshUsers" >> /etc/ssh/sshd_config
+      echo "DenyUsers" >> /etc/ssh/sshd_config
+      chown root:root /etc/ssh/sshd_config
+      chmod 600 /etc/ssh/sshd_config
+      chattr +ai /etc/ssh/sshd_config
     fi
     elif [ SSHPrompt = "n" ]
     then
-      apt-get pruge ssh
+      apt-get purge ssh
       apt-get purge openssh
       apt-get purge openssh-server
       ufw deny ssh
