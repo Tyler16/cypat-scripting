@@ -152,11 +152,14 @@ do
       read -ap "Enter users that need SSH access with a single space seperating each user: " sshUsers
       echo "AllowUsers $sshUsers" >> /etc/ssh/sshd_config
       echo "DenyUsers" >> /etc/ssh/sshd_config
+      read -p "What port should SSH use?" SSHPort
+      sed '5 s/22/${SSHPort}/' /etc/ssh/sshd_config
       chown root:root /etc/ssh/sshd_config
       chmod 600 /etc/ssh/sshd_config
       chattr +ai /etc/ssh/sshd_config
       mkdir ~/.ssh
       chmod 700 ~/.ssh
+      chown root:root ~/.ssh
       ssh-keygen -t rsa
     fi
     elif [ $SSHPrompt = "n" ]
@@ -215,11 +218,19 @@ do
 	chattr +ai /etc/ssl/private/proftpdkey.pem
 	chown root:root /etc/ssl/certs/proftpdcert.pem
 	chmod 600 /etc/ssl/certs/proftpdcert.pem
-	chattr +ai /etc/ssl/certs/vsftpdcert.pem
+	chattr +ai /etc/ssl/certs/proftpdcert.pem
       fi
       elif [ $FTPApplication = "3" ]
       then
       	apt-get install pure-ftpd
+	openssl req -x509 -nodes -keyout /etc/ssl/private/pureftpdkey.pem -out /etc/ssl/certs/proftpcert.pem -days 365 -newkey rsa:2048 -sha256
+	/usr/local/sbin/pure-ftpd --tls=2
+	chown root:root /etc/ssl/private/pureftpdkey.pem
+	chmod 600 /etc/ssl/private/pureftpdkey.pem
+	chattr +ai /etc/ssl/private/pureftpdkey.pem
+	chown root:root /etc/ssl/certs/pureftpdcert.pem
+	chmod 600 /etc/ssl/certs/pureftpdcert.pem
+	chattr +ai /etc/ssl/certs/pureftpdcert.pem
       fi
       elif [ $FTPApplication = "4" ]
       then
@@ -235,6 +246,9 @@ do
       apt-get purge *ftp*
       ufw deny ftp
       ufw deny sftp
+      ufw deny saft
+      ufw deny ftps-data
+      ufw deny ftps
     fi
     else
       echo "Invalid option"
@@ -310,10 +324,38 @@ do
     read -p "Is SQL a critical service? (y/n) " SQLPrompt
     if [ $SQLPrompt = "y" ]
     then
+      echo "What SQL service are you using?"
+      echo "1. MySQL"
+      echo "2. PostgreSQL"
+      echo "3. Other"
+      read -p "> " SQLPackage
+      if [ $SQLPackage = "1" ]
+      then
+      	apt-get install mysql-server
+	mysql_secure_installation
+      fi
+      elif [ $SQLPackage = "2" ]
+      then
+      	apt-get install postgresql
+      fi
+      elif [ $SQLPackage = "3" ]
+      then
+      	read -p "Enter package name and look up how to secure it: " SQLApplication
+	apt-get install $SQLApplication
+      fi
+      else
+      	echo "Invalid response"
+      fi
     fi
     elif [ $SQLPrompt = "n" ]
     then
+      ufw deny ms-sql-s
+      ufw deny ms-sql-m
+      ufw deny mysql
+      ufw deny mysql-proxy
+      ufw deny postgresql
       apt-get purge mysql*
+      apt-get purge postgresql
     fi
     else
       echo "Invalid option"
