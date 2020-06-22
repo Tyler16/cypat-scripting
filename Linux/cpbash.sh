@@ -1,10 +1,17 @@
 #!/bin/bash
+set_permissions {
+	file=$1
+	chown root:root
+	chmod 0600 $file
+}
+
 append_file {
 	file=$1
 	text=$2
 	chmod +rw $file
 	chattr -ai $file
 	echo "$text" >> $file
+	set_permissions $file
 }
 
 rewrite_file {
@@ -13,16 +20,13 @@ rewrite_file {
 	chmod +rw $file
 	chattr -ai $file
 	cat ./$filename > $file
+	set_permissions $file
 }
 
 unalias -a
-
 append_file ~/.bashrc "unalias -a"
-chmod -rw ~/.bashrc
-chattr +ai
-
 append_file ~/.bashrc "unalias -a"
-chmod -rw /root/.bashrc
+
 clear
 echo "Aliases have been removed"
 
@@ -32,11 +36,15 @@ then
 	exit
 fi
 
+filesystems=(cramfs freevxfs jffs2 hfs hfsplus udf)
+
 echo "What OS are you using?"
 echo "1. Ubuntu 16"
 echo "2. Ubuntu 14"
 echo "3. Debian"
 read -p "> " OS
+
+read -p "Enter a password that will be used for every user(except you): " password
 
 read -p "What is your username? " mainUser
 
@@ -52,10 +60,16 @@ do
 	echo "6. Auditing"
 	echo "7. Prohibited files"
 	echo "8. Virus and Rootkits"
-	echo "9. End Script"
+	echo "9. Booting and File Mounting"
+	echo "10. End Script"
 	read -p "> " task
 	if [ $task = "1" ]
 	then
+		echo "Creating file with list of system users"
+		cut -d: -f1 /etc/passwd > users.txt
+		
+		apt-get install slay
+		
 		read -p "Use ReadMe for users? (y/n) " readmeUsers
 		if [ $readmeUsers = "y" ]
 		then
@@ -63,7 +77,52 @@ do
 		fi
 		elif [ $readmeUsers = "n" ]
 		then
-			read -ap "Enter all users in readme with a single space in between each user." users
+			read -ap "Enter all users in readme with a single space in between each user: " users
+			
+			for user in `cat users.txt`
+			do
+				userAllowed=false
+				initialIDDifference=0
+				userID=$(id $user | cut -d= -f2 | cut -d"(" -f1)
+				if [ $userID = 0 ] && [ $user != "root" ]
+				then
+					let newID=2000 + $initialIDDifference
+					usermod -u $newID $user
+					userID=$newID
+					((initialIDDifference++))
+				fi
+				
+				if [ $userID -ne 0 ] && [ $user = "root" ]
+				then
+					usermod -ou 0 root
+				fi
+				
+				if [ $userID -ge 1000 ]
+				then
+					until $userAllowed
+					do
+						if [ $user = $mainUser ] || [[ " ${users[@]} " =~ " ${user} " ]]
+						then
+							userAllowed=true
+						fi
+					done
+				fi
+				
+				if [ $userAllowed ]
+				then
+					echo "${user}:${password}" | chpasswd
+					if [ $user != "$mainUser" ]
+					then
+						slay $user
+					fi
+				fi
+				else
+				then
+					echo "Deleting user $user"
+					slay $user
+					deluser $user
+				fi
+			done
 		fi
 		else
 			echo "Invalid response, skipping user removal"
@@ -94,34 +153,42 @@ do
 			done
 		fi
 		
+		echo "Locking root account and setting password"
+		echo "root:${password}" | chpasswd
+		passwd -l root
+		
 		echo "Setting Password Policies"
 		apt-get install libpam-cracklib
 		rewrite_file common-password /etc/pam.d/common-password
 		rewrite_file login.defs /etc/login.defs
 		rewrite_file common-auth /etc/pam.d/common-auth
-		chown root:root /etc/pam.d/common-password
-		chmod 600 /etc/pam.d/common-password
-		chown root:root /etc/login.defs
-		chmod 600 /etc/login.defs
-		chown root:root /etc/pam.d/common-auth
-		chmod 600 /etc/common-auth
 	fi
 	elif [ $task = "2" ]
 	then
-	read -p "Do updates now? (y/n) " updatePrompt
-	if [ $updatePrompt = "y" ]
-	then
-		echo "Updating, this might take a while"
 		apt-get update
-		apt-get upgrade -y
-		apt-get dist-upgrade -y
+		read -p "Do updates now? (y/n) " updatePrompt
+		if [ $updatePrompt = "y" ]
+		then
+			echo "Updating, this might take a while"
+			apt-get upgrade -y
+			apt-get dist-upgrade -y
 		fi
 	fi
 	elif [ $task = "3" ]
 	then
 		apt-get install ufw
+		apt-get install gufw
 		apt-get install iptables
 		ufw enable
+		read -p "Do you want to turn on a VPN(Requires SSH, HTTP and HTTPS ports to be allowed)? (y/n) " VPNPrompt
+		if [ $VPNPrompt = "y" ]
+		then
+			ufw allow 22
+			ufw allow 80
+			ufw allow 443
+			wget https://git.io/vpn -O openvpn-install.sh
+			bash openvpn-install.sh
+		fi
 	fi
 	elif [ $task = "4" ]
 	then
@@ -134,11 +201,15 @@ do
 				apt-get install $package
 			done
 		fi
+		
 		echo "Removing hacking tools and vulnerable services"
 		apt-get purge aircrack-ng alien apktool autofs crack crack-common crack-md5 fcrackzip gamconqueror hashcat hydra* irpas *inetd inetutils* john* *kismet* lcrack logkeys *macchanger* *netcat* ncat nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* portmap pdfcrack pixiewps rarcrack rsh-server rpcbind sbd sipcrack snmp socat sock socket sucrack tftpd-hpa vnc4server vncsnapshot vtgrab wireshark yersinia *zeitgeist*
 		
 		echo "Removing games"
 		apt-get purge 0ad* 2048-qt 4digit 7kaa* a7xpg* abe* aajm acm ace-of-penguins adanaxisgpl* adonthell* airstrike* aisleriot alex4* alien-arena* alienblaster* amoebax* amphetamine* an anagramarama* angband* angrydd animals antigravitaattori ardentryst armagetronad* asc asc-data asc-music ascii-jump assultcube* astromenace* asylum* atanks* atom4 atomic* attal* auralquiz balder2d* ballerburg ballz* bambam barrage bastet bb bear-factory beneath-a-steel-sky berusky* between billard* biloba* biniax2* black-box blobandconquer* blobby* bloboats blobwars* blockattack blockout2 blocks-of-the-undead* bombardier bomber bomberclone* boswars* bouncy bovo brainparty* briquolo* bsdgames* btanks* bubbros bugsquish bumprace* burgerspace bve* openbve* bygfoot* bzflag* cappuccino cardstories castle-combat cavezofphear ceferino* cgoban *chess* childsplay* chipw chocolate* chromium-bsu* circuslinux* colobot* colorcode connectagram* cookietool *cowsay* crack-attack crafty* crawl* crimson criticalmass* crossfire* crrcism* csmash* cube2* cultivation curseofwar cutemaze cuyo* cyphesis-cpp* cytadela* *x-rebirth dangen darkplaces* dds deal dealer defendguin* desmume deutex dhewm3* dizzy dodgindiamond2 dolphin-emu* doom-wad-shareware doomsday* dopewars* dossizola* drascula* dvorak7min eboard* edgar* efp einstein ember-media empire* endless-sky* enemylines* enigma* epiphany* etoys etw* excellent-bifurcation extremetuxracer* exult* fairymax fb-music-high ffrenzy fgo fgrun fheroes2-pkg filler fillets-ng* filters five-or-more fizmo* flare* flight-of-the-amazon-queen flightgear* flobopuyo fltk1.1-games fltk1.3-games fofix foobillard* fortune* four-in-a-row freealchemist freecell-solver-bin freeciv* freecol freedink* freedm freedoom freedroid* freegish freeorion* freespace2* freesweep freetennis* freevial fretsonfire* frobtads frogatto frotz frozen-bubble* fruit funguloids* funnyboat gamazons game-data-packager gameclock gamine* garden-of-coloured-lights* gargoyle-free gav* gbrainy gcompris* gearhead* geekcode geki* gemdropx gemrb* geneatd gfceu gfpoken gl-117* glaurung glhack glines glob2* glpeces* gltron gmult gnect gnibbles gnobots2 gnome-breakout gnome-cards-data gnome-hearts gnome-klotski gnome-mahjongg gnome-mastermind gnome-mines gnome-nibbles gnome-robots gnome-sudoku gnome-tetravex gnomine gnotravex gnotski gnubg* gnubik gnuboy* gnudoq gnugo gnujump* gnuminishogi gnurobbo* gnurobots gnushogi golly gomoko.app gplanarity gpsshogi* granatier granule gravitation gravitywars greed grhino grhino-data gridlock.app groundhog gsalliere gtali gtans gtkballs gtkboard gtkboard gtkpool gunroar* gvrng gweled hachu hannah* hearse hedgewars* heroes* hex-a-hop hexalate hexxagon higan hitori hoichess holdingnuts holotz-castle* hyperrogue* iagno icebreaker ii-esu ifon instead* ioquake3 jester jigzo* jmdlx jumpnbump* jzip kajongg kanagram kanatest kapman katomic kawari8 kball* kblackbox kblocks kbounce kbreakout kcheckers kdegames* kdiamond ketm* kfourinline kgoldrunner khangman kigo kiki-the-nano-bot* kildclient killbots kiriki kjumpingcube klickety klines kmahjongg kmines knavalbattle knetwalk knights kobodeluxe* kolf kollision komi konquest koules kpat krank kraptor* kreversi kshisen ksirk ksnakeduel kspaceduel ksquares ksudoku ktuberling kubrick laby late* lbreakout2* lgc-pg lgeneral* libatlas-cpp-0.6-tools libgemrb libretro-nestopia lierolibre* lightsoff lightyears lincity* linthesia liquidwar* littlewizard* llk-linux lmarbles lmemory lolcat londonlaw lordsawar* love* lskat ltris luola* lure-of-the-temptress macopix-gtk2 madbomber* maelstrom magicmaze magicor* magictouch mah-jong mahjongg mame* manaplus* mancala marsshooter* matanza mazeofgalious* mednafen megaglest* meritous* mess* mgt miceamaze micropolis* minetest* mirrormagic* mokomaze monopd monster-masher monsterz* moon-buggy* moon-lander* moria morris mousetrap mrrescue mttroff mu-cade* mudlet multitet mupen64plus* nestopia nethack* netmaze netpanzer* netris nettoe neverball* neverputt* nexuiz* nikiwi* ninix-aya ninvaders njam* noiz2sa* nsnake numptyphysics ogamesim* omega-rpg oneisenough oneko onscripter oolite* open-invaders* openarena* opencity* openclonk* openlugaru* openmw* openpref openssn* openttd* opentyrian openyahtzee orbital-eunuchs-sniper* out-of-order overgod* pachi pacman* palapeli* pangzero parsec47* passage pathogen pathological pax-britannica* pcsx2 pcsxr peg-e peg-solitaire pegsolitaire penguin-command pente pentobi performous* pescetti petris pgn-extract phalanx phlipple* pianobooster picmi pinball* pingus* pink-pony* pioneers* pipenightdreams* pipwalker pixbros pixfrogger planarity plee-the-bear* pokerth* polygen* polyglot pong2 powder powermanga* pq prboom-plus* primrose projectl purity* pybik* pybridge* pykaraoke* pynagram pyracerz pyscrabble* pysiogame pysolfc* pysycache* python-pykaraoke python-renpy qgo qonk qstat qtads quadrapassel quake* quarry qxw rafkill* raincat* randtype rbdoom3bfg redeclipse* reminiscence renpy* residualvm* ri-li* rlvm robocode robotfindskitten rockdodger rocksndiamonds rolldice rott rrootage salliere sandboxgamemaker sauerbraten* scid* scorched3d* scottfree scummvm* sdl-ball* seahorse-adventures searchandrescue* sgt-puzzles shogivar* simutrans* singularity* sjaakii sjeng sl slashem* slimevolley* slingshot sludge-empire sm snake4 snowballz solarwolf sopwith spacearyarya spacezero speedpad spellcast sponc spout spring* starfighter* starvoyager* stax steam steamcmd stockfish stormbaancoureur* sudoku supertransball2* supertux* swell-foop tads3-common tagua* tali tanglet* tatan tdfsb tecnoballz* teeworlds* tenace tenmado tennix tetrinet* tetzle tf tf5 tictactoe-ng tint tintin++ tinymux titanion* toga2 tomatoes* tome toppler torcs* tourney-manager trackballs* transcend treil trigger-rally* triplane triplea trophy* tumiki-fighters* tuxfootball tuxmath* tuxpuck tuxtype* tworld* typespeed uci2wb ufoai* uhexen2* uligo unknown-horizons uqm* val-and-rick* vbaexpress vcmi vectoroids viruskiller visualboyadvance* vodovod warmux* warzone2100* wesnoth* whichwayisup widelands* wing* wizznic* wmpuzzle wolf4sdl wordplay wordwarvi* xabacus xball xbill xblast-tnt* xboard xbomb xbubble* xchain xdemineur xdesktopwaves xevil xfireworks xfishtank xflip xfrisk xgalaga* xgammon xinv3d xjig xjokes xjump xletters xmabacus xmahjongg xmile xmoto* xmountains xmpuzzles xonix xpat2 xpenguins xphoon xpilot* xpuzzles xqf xracer* xscavenger xscorch xscreensaver-screensaver-dizzy xshisen xshogi xskat xsok xsol xsoldier xstarfish xsystem35 xteddy xtron xvier xwelltris xword xye yahtzeesharp yamagi-quake2* zangband* zatacka zaz* zec zivot zoom-player
+		
+		echo "Installing security applications"
+		apt-get install gnupg
 	fi
 	elif [ $task = "5" ]
 	then
@@ -150,16 +221,15 @@ do
 			apt-get install openssh-server
 			ufw allow ssh
 			rewrite_file sshd_config /etc/ssh/sshd_config
+			chmod +w /etc/ssh/sshd_config
 			read -ap "Enter users that need SSH access with a single space seperating each user: " sshUsers
 			echo "AllowUsers $sshUsers" >> /etc/ssh/sshd_config
 			echo "DenyUsers" >> /etc/ssh/sshd_config
 			read -p "What port should SSH use?" SSHPort
 			sed '5 s/22/${SSHPort}/' /etc/ssh/sshd_config
-			chown root:root /etc/ssh/sshd_config
-			chmod 600 /etc/ssh/sshd_config
-			chattr +ai /etc/ssh/sshd_config
+			chmod -w /etc/ssh/sshd_config
 			mkdir ~/.ssh
-			chmod 700 ~/.ssh
+			chmod 0700 ~/.ssh
 			chown root:root ~/.ssh
 			ssh-keygen -t rsa
 		fi
@@ -192,15 +262,8 @@ do
 				apt-get install vsftpd
 				openssl req -x509 -nodes -keyout /etc/ssl/private/vsftpdkey.pem -out /etc/ssl/certs/vsftpdcert.pem -days 365 -newkey rsa:2048
 				rewrite_file vsftpd.conf /etc/vsftpd.conf
-				chown root:root /etc/vsftpd.conf
-				chmod 600 /etc/vsftpd.conf
-				chattr +ai /etc/vsftpd.conf
-				chown root:root /etc/ssl/private/vsftpdkey.pem
-				chmod 600 /etc/ssl/private/vsftpdkey.pem
-				chattr +ai /etc/ssl/private/vsftpdkey.pem
-				chown root:root /etc/ssl/certs/vsftpdcert.pem
-				chmod 600 /etc/ssl/certs/vsftpdcert.pem
-				chattr +ai /etc/ssl/certs/vsftpdcert.pem
+				set_permissions /etc/ssl/private/vsftpdkey.pem
+				set_permissions /etc/ssl/certs/vsftpdcert.pem
 			fi
 			elif [ $FTPApplication = "2" ]
 			then
@@ -208,30 +271,16 @@ do
 				openssl req -x509 -nodes -keyout /etc/ssl/private/proftpdkey.pem -out /etc/ssl/certs/proftpdcert.pem -days 365 -newkey rsa:2048
 				rewrite_file tls.conf /etc/proftpd/tls.conf
 				rewrite_file proftpd.conf /etc/proftpd/proftpd.conf
-				chown root:root /etc/proftpd/proftpd.conf
-				chmod 600 /etc/proftpd/proftpd.conf
-				chattr +ai /etc/proftpd/proftpd.conf
-				chown root:root /etc/proftpd/tls.conf
-				chmod 600 /etc/proftpd/tls.conf
-				chattr +ai /etc/proftpd/tls.conf
-				chown root:root /etc/ssl/private/proftpdkey.pem
-				chmod 600 /etc/ssl/private/proftpdkey.pem
-				chattr +ai /etc/ssl/private/proftpdkey.pem
-				chown root:root /etc/ssl/certs/proftpdcert.pem
-				chmod 600 /etc/ssl/certs/proftpdcert.pem
-				chattr +ai /etc/ssl/certs/proftpdcert.pem
+				set_permissions /etc/ssl/private/proftpdkey.pem
+				set_permissions /etc/ssl/certs/proftpdcert.pem
 			fi
 			elif [ $FTPApplication = "3" ]
 			then
 				apt-get install pure-ftpd
 				openssl req -x509 -nodes -keyout /etc/ssl/private/pureftpdkey.pem -out /etc/ssl/certs/proftpcert.pem -days 365 -newkey rsa:2048 -sha256
 				/usr/local/sbin/pure-ftpd --tls=2
-				chown root:root /etc/ssl/private/pureftpdkey.pem
-				chmod 600 /etc/ssl/private/pureftpdkey.pem
-				chattr +ai /etc/ssl/private/pureftpdkey.pem
-				chown root:root /etc/ssl/certs/pureftpdcert.pem
-				chmod 600 /etc/ssl/certs/pureftpdcert.pem
-				chattr +ai /etc/ssl/certs/pureftpdcert.pem
+				set_permissions root:root /etc/ssl/private/pureftpdkey.pem
+				set_permissions /etc/ssl/certs/pureftpdcert.pem
 			fi
 			elif [ $FTPApplication = "4" ]
 			then
@@ -442,6 +491,28 @@ do
 		fi
 	fi
 	elif [ $task = "9" ]
+	then
+		echo "Disabling unused filesystems"
+		touch /etc/modprobe.d/Cypat.conf
+		for filesystem in "${filesystems[@]}"
+		do
+			echo "install ${filesystem} /bin/true" >> /etc/modprobe.d/Cypat.conf
+			rmmod $filesystem
+		done
+		set_permissions /etc/modprobe.d/Cypat.conf
+		chown root:root /etc/modprobe.d/cypat.conf
+		
+		echo "Setting up filesystem integrity checks"
+		apt-get install aide aide-common
+		aideinit
+		
+		echo "Setting up boot security"
+		chown root:root /boot/grub/grub.cfg
+		chmod 0700 /boot/grub/grub.cfg
+		
+		grub-mkpasswd-pbkdf2
+	fi
+	elif [ $task = "10" ]
 	then
 		exit
 	fi
