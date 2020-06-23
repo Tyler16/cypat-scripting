@@ -165,6 +165,17 @@ do
 	fi
 	elif [ $task = "2" ]
 	then
+		if [ $OS = "1" ]
+		then
+			rewrite_file ubuntu16Sources.list /etc/apt/sources.list
+			chmod 0640 /etc/apt/sources.list
+		fi
+		
+		rewrite_file 10periodic /etc/apt/apt.conf.d/10periodic
+		chmod 0640 /etc/apt/apt.conf.d/10periodic
+		rewrite_file 20auto-upgrades /etc/apt/apt.conf.d/20auto-upgrades
+		chmod 0640 /etc/apt/apt.conf.d/20auto-upgrades
+		
 		apt-get update
 		read -p "Do updates now? (y/n) " updatePrompt
 		if [ $updatePrompt = "y" ]
@@ -189,6 +200,29 @@ do
 			wget https://git.io/vpn -O openvpn-install.sh
 			bash openvpn-install.sh
 		fi
+		echo "Setting network settings for sysctl(CIS 1.16 3.1-3)"
+		rewrite_file sysctl.conf /etc/sysctl.conf
+		sysctl -w net.ipv4.ip_forward=0
+		sysctl -w net.ipv4.conf.all.send_redirects=0
+		sysctl -w net.ipv4.conf.default.send_redirects=0
+		sysctl -w net.ipv4.conf.all.accept_source_route=0
+		sysctl -w net.ipv4.conf.default.accept_source_route=0
+		sysctl -w net.ipv4.conf.all.accept_redirects=0
+		sysctl -w net.ipv4.conf.default.accept_redirects=0
+		sysctl -w net.ipv4.conf.all.secure_redirects=0
+		sysctl -w net.ipv4.conf.default.secure_redirects=0
+		sysctl -w net.ipv4.conf.all.log_martians=1
+		sysctl -w net.ipv4.conf.default.log_martians=1
+		sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=1
+		sysctl -w net.ipv4.icmp_ignore_bogus_error_responses=1
+		sysctl -w net.ipv4.conf.all.rp_filter=1
+		sysctl -w net.ipv4.conf.default.rp_filter=1
+		sysctl -w net.ipv4.tcp_syncookies=1
+		sysctl -w net.ipv6.conf.all.accept_ra=0
+		sysctl -w net.ipv6.conf.default.accept_ra=0
+		sysctl -w net.ipv6.conf.all.accept_redirects=0
+		sysctl -w net.ipv6.conf.default.accept_redirects=0
+		sysctl -w net.ipv4.route.flush=1
 	fi
 	elif [ $task = "4" ]
 	then
@@ -202,8 +236,9 @@ do
 			done
 		fi
 		
-		echo "Removing hacking tools and vulnerable services"
-		apt-get purge aircrack-ng alien apktool autofs crack crack-common crack-md5 fcrackzip gamconqueror hashcat hydra* irpas *inetd inetutils* john* *kismet* lcrack logkeys *macchanger* *netcat* ncat nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* portmap pdfcrack pixiewps rarcrack rsh-server rpcbind sbd sipcrack snmp socat sock socket sucrack tftpd-hpa vnc4server vncsnapshot vtgrab wireshark yersinia *zeitgeist*
+		echo "Removing hacking tools and vulnerable services(Includes CIS 16 1.5.4)"
+		prelink -ua
+		apt-get purge aircrack-ng alien apktool autofs crack crack-common crack-md5 fcrackzip gamconqueror hashcat hydra* irpas *inetd inetutils* john* *kismet* lcrack logkeys *macchanger* *netcat* ncat nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* pdfcrack pixiewps portmap prelink rarcrack rsh-server rpcbind sbd sipcrack snmp socat sock socket sucrack tftpd-hpa vnc4server vncsnapshot vtgrab wireshark yersinia *zeitgeist*
 		
 		echo "Removing games"
 		apt-get purge 0ad* 2048-qt 4digit 7kaa* a7xpg* abe* aajm acm ace-of-penguins adanaxisgpl* adonthell* airstrike* aisleriot alex4* alien-arena* alienblaster* amoebax* amphetamine* an anagramarama* angband* angrydd animals antigravitaattori ardentryst armagetronad* asc asc-data asc-music ascii-jump assultcube* astromenace* asylum* atanks* atom4 atomic* attal* auralquiz balder2d* ballerburg ballz* bambam barrage bastet bb bear-factory beneath-a-steel-sky berusky* between billard* biloba* biniax2* black-box blobandconquer* blobby* bloboats blobwars* blockattack blockout2 blocks-of-the-undead* bombardier bomber bomberclone* boswars* bouncy bovo brainparty* briquolo* bsdgames* btanks* bubbros bugsquish bumprace* burgerspace bve* openbve* bygfoot* bzflag* cappuccino cardstories castle-combat cavezofphear ceferino* cgoban *chess* childsplay* chipw chocolate* chromium-bsu* circuslinux* colobot* colorcode connectagram* cookietool *cowsay* crack-attack crafty* crawl* crimson criticalmass* crossfire* crrcism* csmash* cube2* cultivation curseofwar cutemaze cuyo* cyphesis-cpp* cytadela* *x-rebirth dangen darkplaces* dds deal dealer defendguin* desmume deutex dhewm3* dizzy dodgindiamond2 dolphin-emu* doom-wad-shareware doomsday* dopewars* dossizola* drascula* dvorak7min eboard* edgar* efp einstein ember-media empire* endless-sky* enemylines* enigma* epiphany* etoys etw* excellent-bifurcation extremetuxracer* exult* fairymax fb-music-high ffrenzy fgo fgrun fheroes2-pkg filler fillets-ng* filters five-or-more fizmo* flare* flight-of-the-amazon-queen flightgear* flobopuyo fltk1.1-games fltk1.3-games fofix foobillard* fortune* four-in-a-row freealchemist freecell-solver-bin freeciv* freecol freedink* freedm freedoom freedroid* freegish freeorion* freespace2* freesweep freetennis* freevial fretsonfire* frobtads frogatto frotz frozen-bubble* fruit funguloids* funnyboat gamazons game-data-packager gameclock gamine* garden-of-coloured-lights* gargoyle-free gav* gbrainy gcompris* gearhead* geekcode geki* gemdropx gemrb* geneatd gfceu gfpoken gl-117* glaurung glhack glines glob2* glpeces* gltron gmult gnect gnibbles gnobots2 gnome-breakout gnome-cards-data gnome-hearts gnome-klotski gnome-mahjongg gnome-mastermind gnome-mines gnome-nibbles gnome-robots gnome-sudoku gnome-tetravex gnomine gnotravex gnotski gnubg* gnubik gnuboy* gnudoq gnugo gnujump* gnuminishogi gnurobbo* gnurobots gnushogi golly gomoko.app gplanarity gpsshogi* granatier granule gravitation gravitywars greed grhino grhino-data gridlock.app groundhog gsalliere gtali gtans gtkballs gtkboard gtkboard gtkpool gunroar* gvrng gweled hachu hannah* hearse hedgewars* heroes* hex-a-hop hexalate hexxagon higan hitori hoichess holdingnuts holotz-castle* hyperrogue* iagno icebreaker ii-esu ifon instead* ioquake3 jester jigzo* jmdlx jumpnbump* jzip kajongg kanagram kanatest kapman katomic kawari8 kball* kblackbox kblocks kbounce kbreakout kcheckers kdegames* kdiamond ketm* kfourinline kgoldrunner khangman kigo kiki-the-nano-bot* kildclient killbots kiriki kjumpingcube klickety klines kmahjongg kmines knavalbattle knetwalk knights kobodeluxe* kolf kollision komi konquest koules kpat krank kraptor* kreversi kshisen ksirk ksnakeduel kspaceduel ksquares ksudoku ktuberling kubrick laby late* lbreakout2* lgc-pg lgeneral* libatlas-cpp-0.6-tools libgemrb libretro-nestopia lierolibre* lightsoff lightyears lincity* linthesia liquidwar* littlewizard* llk-linux lmarbles lmemory lolcat londonlaw lordsawar* love* lskat ltris luola* lure-of-the-temptress macopix-gtk2 madbomber* maelstrom magicmaze magicor* magictouch mah-jong mahjongg mame* manaplus* mancala marsshooter* matanza mazeofgalious* mednafen megaglest* meritous* mess* mgt miceamaze micropolis* minetest* mirrormagic* mokomaze monopd monster-masher monsterz* moon-buggy* moon-lander* moria morris mousetrap mrrescue mttroff mu-cade* mudlet multitet mupen64plus* nestopia nethack* netmaze netpanzer* netris nettoe neverball* neverputt* nexuiz* nikiwi* ninix-aya ninvaders njam* noiz2sa* nsnake numptyphysics ogamesim* omega-rpg oneisenough oneko onscripter oolite* open-invaders* openarena* opencity* openclonk* openlugaru* openmw* openpref openssn* openttd* opentyrian openyahtzee orbital-eunuchs-sniper* out-of-order overgod* pachi pacman* palapeli* pangzero parsec47* passage pathogen pathological pax-britannica* pcsx2 pcsxr peg-e peg-solitaire pegsolitaire penguin-command pente pentobi performous* pescetti petris pgn-extract phalanx phlipple* pianobooster picmi pinball* pingus* pink-pony* pioneers* pipenightdreams* pipwalker pixbros pixfrogger planarity plee-the-bear* pokerth* polygen* polyglot pong2 powder powermanga* pq prboom-plus* primrose projectl purity* pybik* pybridge* pykaraoke* pynagram pyracerz pyscrabble* pysiogame pysolfc* pysycache* python-pykaraoke python-renpy qgo qonk qstat qtads quadrapassel quake* quarry qxw rafkill* raincat* randtype rbdoom3bfg redeclipse* reminiscence renpy* residualvm* ri-li* rlvm robocode robotfindskitten rockdodger rocksndiamonds rolldice rott rrootage salliere sandboxgamemaker sauerbraten* scid* scorched3d* scottfree scummvm* sdl-ball* seahorse-adventures searchandrescue* sgt-puzzles shogivar* simutrans* singularity* sjaakii sjeng sl slashem* slimevolley* slingshot sludge-empire sm snake4 snowballz solarwolf sopwith spacearyarya spacezero speedpad spellcast sponc spout spring* starfighter* starvoyager* stax steam steamcmd stockfish stormbaancoureur* sudoku supertransball2* supertux* swell-foop tads3-common tagua* tali tanglet* tatan tdfsb tecnoballz* teeworlds* tenace tenmado tennix tetrinet* tetzle tf tf5 tictactoe-ng tint tintin++ tinymux titanion* toga2 tomatoes* tome toppler torcs* tourney-manager trackballs* transcend treil trigger-rally* triplane triplea trophy* tumiki-fighters* tuxfootball tuxmath* tuxpuck tuxtype* tworld* typespeed uci2wb ufoai* uhexen2* uligo unknown-horizons uqm* val-and-rick* vbaexpress vcmi vectoroids viruskiller visualboyadvance* vodovod warmux* warzone2100* wesnoth* whichwayisup widelands* wing* wizznic* wmpuzzle wolf4sdl wordplay wordwarvi* xabacus xball xbill xblast-tnt* xboard xbomb xbubble* xchain xdemineur xdesktopwaves xevil xfireworks xfishtank xflip xfrisk xgalaga* xgammon xinv3d xjig xjokes xjump xletters xmabacus xmahjongg xmile xmoto* xmountains xmpuzzles xonix xpat2 xpenguins xphoon xpilot* xpuzzles xqf xracer* xscavenger xscorch xscreensaver-screensaver-dizzy xshisen xshogi xskat xsok xsol xsoldier xstarfish xsystem35 xteddy xtron xvier xwelltris xword xye yahtzeesharp yamagi-quake2* zangband* zatacka zaz* zec zivot zoom-player
@@ -492,25 +527,71 @@ do
 	fi
 	elif [ $task = "9" ]
 	then
-		echo "Disabling unused filesystems"
+		echo "Disabling unused filesystems(CIS 16 and 14 1.1.1.1-6)"
 		touch /etc/modprobe.d/Cypat.conf
 		for filesystem in "${filesystems[@]}"
 		do
-			echo "install ${filesystem} /bin/true" >> /etc/modprobe.d/Cypat.conf
+			echo "install ${filesystem} /bin/true" >> /etc/modprobe.d/cypat.conf
 			rmmod $filesystem
 		done
-		set_permissions /etc/modprobe.d/Cypat.conf
+		set_permissions /etc/modprobe.d/cypat.conf
 		chown root:root /etc/modprobe.d/cypat.conf
 		
-		echo "Setting up filesystem integrity checks"
+		echo "Setting up sticky bit on world writeable directories(CIS 16 and 14 1.1.20)"
+		df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type d -perm -0002 2>/dev/null | xargs chmod a+t
+		
+		echo "Disabling automounting(CIS 16 1.1.21)"
+		systemctl disable autofs
+		
+		echo "Setting up filesystem integrity checks(CIS 16 and 14 1.3.1)"
 		apt-get install aide aide-common
 		aideinit
 		
-		echo "Setting up boot security"
+		echo "Setting up boot security(CIS 16 and 14 1.4.1-2)"
 		chown root:root /boot/grub/grub.cfg
 		chmod 0700 /boot/grub/grub.cfg
 		
+		echo "Please set secure password for boot"
 		grub-mkpasswd-pbkdf2
+		echo "Copy hash of password above"
+		read -p "Paste password hash here: " grubPassword
+		rewrite_file 00_header /etc/grub.d/00_header
+		chmod +w /etc/grub.d/00_header
+		echo 'cat <<EOF' >> /etc/grub.d/00_header
+		echo 'set superusers="${mainUser}"' >> /etc/grub.d/00_header
+		echo 'password pbkdf2 ${mainUser} ${grubPassword}' >> /etc/grub.d/00_header
+		echo 'EOF' >> /etc/grub.d/00_header
+		chmod 600 /boot/grub.d/00_header
+		
+		echo "Doing additional process hardening (CIS 16 1.5.1 and 1.5.3)"
+		rewrite_file limits.conf /etc/security/limits.conf
+		sysctl -w fs.suid_dumpable=0
+		sysctl -w kernel.randomize_va_space=2
+		
+		echo "Configuring AppArmor (CIS 16 1.6(not using selinux))"
+		apt-get install apparmor apparmor-profiles
+		aa-enforce /etc/apparmor.d/*
+		rewrite_file grub /etc/default/grub
+		
+		echo "Setting up banners and messages (CIS 16 1.7)"
+		touch /etc/motd
+		echo "Hello and welcome to fortnite central" >> /etc/motd
+		chown root:root /etc/motd
+		chmod 640 /etc/motd
+		echo "Authorized uses only. All activity may be monitored and reported." > /etc/issue
+		chown root:root /etc/issue
+		chmod 640 /etc/issue
+		echo "Authorized uses only. All activity may be monitored and reported." > /etc/issue.net
+		chown root:root /etc/issue.net
+		chmod 640 /etc/issue.net
+		touch /etc/dconf/profile/gdm
+		echo "user-db:user" >> /etc/dconf/profile/gdm
+		echo "system-db:gdm" >> /etc/dconf/profile/gdm
+		echo "file-db:/usr/share/gdm/greeter-dconf-defaults" >> /etc/dconf/profile/gdm
+		mkdir /etc/dconf/db/gdm.d
+		cp 01-banner-message /etc/dconf/db/gdm.d
+		update-grub
+		dconf update
 	fi
 	elif [ $task = "10" ]
 	then
