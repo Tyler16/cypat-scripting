@@ -8,7 +8,7 @@ set_permissions {
 append_file {
 	file=$1
 	text=$2
-	chmod +rw $file
+	chmod 777 $file
 	chattr -ai $file
 	echo "$text" >> $file
 	set_permissions $file
@@ -17,7 +17,7 @@ append_file {
 rewrite_file {
 	filename=$1
 	file=$2
-	chmod +rw $file
+	chmod 777 $file
 	chattr -ai $file
 	cat ./$filename > $file
 	set_permissions $file
@@ -52,18 +52,40 @@ while [ true ]
 do
 	clear
 	echo "Choose a task"
-	echo "1. Users and Passwords"
-	echo "2. Updates"
+	echo "1. Updates"
+	echo "2. Users and Passwords"
 	echo "3. Network Security"
 	echo "4. Package Management"
 	echo "5. Critical Services"
 	echo "6. Auditing"
 	echo "7. Prohibited files"
-	echo "8. Virus and Rootkits"
+	echo "8. Virus, Rootkits and unwanted Scripts"
 	echo "9. Booting and File Mounting"
 	echo "10. End Script"
 	read -p "> " task
 	if [ $task = "1" ]
+	then
+		if [ $OS = "1" ]
+		then
+			rewrite_file ubuntu16Sources.list /etc/apt/sources.list
+			chmod 0640 /etc/apt/sources.list
+		fi
+		
+		rewrite_file 10periodic /etc/apt/apt.conf.d/10periodic
+		chmod 0640 /etc/apt/apt.conf.d/10periodic
+		rewrite_file 20auto-upgrades /etc/apt/apt.conf.d/20auto-upgrades
+		chmod 0640 /etc/apt/apt.conf.d/20auto-upgrades
+		
+		apt-get update
+		read -p "Do updates now(only if rest of script is ran)? (y/n) " updatePrompt
+		if [ $updatePrompt = "y" ]
+		then
+			echo "Updating, this might take a while"
+			apt-get upgrade -y
+			apt-get dist-upgrade -y
+		fi
+	fi
+	elif [ $task = "2" ]
 	then
 		echo "Creating file with list of system users"
 		cut -d: -f1 /etc/passwd > users.txt
@@ -77,7 +99,7 @@ do
 		fi
 		elif [ $readmeUsers = "n" ]
 		then
-			read -ap "Enter all users in readme with a single space in between each user: " users
+			read -ap "Enter all users in readme with a single space in between each user(including admins): " users
 			
 			for user in `cat users.txt`
 			do
@@ -115,9 +137,23 @@ do
 					then
 						slay $user
 					fi
+					
+					read -p "Is user ${user} an authorized admin? (y/n) " adminPrompt
+					if [ $adminPrompt = "y" ]
+					then
+						gpasswd -a $user sudo
+						gpasswd -a $user adm
+						gpasswd -a $user lpadmin
+						gpasswd -a $user sambashare
+					fi
+					else
+						gpasswd -d $user sudo
+						gpasswd -d $user adm
+						gpasswd -d $user lpadmin
+						gpasswd -d $user sambashare
+					fi
 				fi
 				else
-				then
 					echo "Deleting user $user"
 					slay $user
 					deluser $user
@@ -135,6 +171,14 @@ do
 			for user in "${newUsers[@]}"
 			do
 				adduser $user
+				read -p "Should user be an admin? (y/n) " adminPrompt
+				if [ adminPrompt = "y" ]
+				then
+					gpasswd -a $user sudo
+					gpasswd -a $user adm
+					gpasswd -a $user lpadmin
+					gpasswd -a $user sambashare
+				fi
 			done
 		fi
 		
@@ -153,44 +197,58 @@ do
 			done
 		fi
 		
+		read -p "Are there any groups that need to be modified/checked? (y/n) " modifiedGroup
+		if [ $modifiedGroup = "y" ]
+		then
+			read -ap "Enter all groups that need to be modified with a single space seperating each group: " modifiedGroupNames
+			for group in "${modifiedGroupNames[@]}"
+			do
+				read -ap "Enter all users that should be in group ${group}:" allowedUsers
+				
+			done
+		fi
+		
 		echo "Locking root account and setting password"
 		echo "root:${password}" | chpasswd
 		passwd -l root
+		
+		echo "Setting up lightdm file"
+		rm /etc/lightdm/lightdm.conf
+		rm -R /etc/lightdm/lightdm.conf.d/*
+		touch /etc/lightdm/lightdm.conf
+		rewrite_file lightdm.conf /etc/lightdm/lightdm.conf
+		
+		echo "Preventing su access"
+		rewrite_file su /etc/pam.d/su
 		
 		echo "Setting Password Policies"
 		apt-get install libpam-cracklib
 		rewrite_file common-password /etc/pam.d/common-password
 		rewrite_file login.defs /etc/login.defs
 		rewrite_file common-auth /etc/pam.d/common-auth
-	fi
-	elif [ $task = "2" ]
-	then
-		if [ $OS = "1" ]
-		then
-			rewrite_file ubuntu16Sources.list /etc/apt/sources.list
-			chmod 0640 /etc/apt/sources.list
-		fi
 		
-		rewrite_file 10periodic /etc/apt/apt.conf.d/10periodic
-		chmod 0640 /etc/apt/apt.conf.d/10periodic
-		rewrite_file 20auto-upgrades /etc/apt/apt.conf.d/20auto-upgrades
-		chmod 0640 /etc/apt/apt.conf.d/20auto-upgrades
+		echo "Setting permissions on user info files and bash history files"
+		chown root:root .bash_history
+		chmod 640 .bash_history
+		chmod 600 /etc/shadow
 		
-		apt-get update
-		read -p "Do updates now? (y/n) " updatePrompt
-		if [ $updatePrompt = "y" ]
-		then
-			echo "Updating, this might take a while"
-			apt-get upgrade -y
-			apt-get dist-upgrade -y
-		fi
+		for file in /etc/sudoers.d/*
+		do
+			echo "Delete ${file}(only delete if not main sudoers file)? (y/n)"
+			rm $file
+		done
+		visudo
 	fi
 	elif [ $task = "3" ]
 	then
+		echo "Setting up firewall"
 		apt-get install ufw
-		apt-get install gufw
 		apt-get install iptables
 		ufw enable
+		
+		echo "Setting hosts file to default"
+		rewrite_file hosts /etc/hosts
+		
 		read -p "Do you want to turn on a VPN(Requires SSH, HTTP and HTTPS ports to be allowed)? (y/n) " VPNPrompt
 		if [ $VPNPrompt = "y" ]
 		then
@@ -200,6 +258,7 @@ do
 			wget https://git.io/vpn -O openvpn-install.sh
 			bash openvpn-install.sh
 		fi
+		
 		echo "Setting network settings for sysctl(CIS 1.16 3.1-3)"
 		rewrite_file sysctl.conf /etc/sysctl.conf
 		sysctl -w net.ipv4.ip_forward=0
@@ -221,11 +280,11 @@ do
 		sysctl -w net.ipv6.conf.all.accept_ra=0
 		sysctl -w net.ipv6.conf.default.accept_ra=0
 		sysctl -w net.ipv6.conf.all.accept_redirects=0
-		sysctl -w net.ipv6.conf.default.accept_redirects=0
+		sysctl -w nerects=0
 		sysctl -w net.ipv4.route.flush=1
 	fi
 	elif [ $task = "4" ]
-	then
+	then net.ipv6.conf.default.accept_redi
 		read -p "Are there any extra packages that need to be installed? (y/n) " packagePrompt
 		if [ packagePrompt="y" ]
 		then
@@ -513,12 +572,38 @@ do
 	fi
 	elif [ $task = "7" ]
 	then
-		find / -name "*.shosts" -type f -delete
-		find / -name "shosts.equiv" -type f -delete
+		read -p "Enter a password of any admin from the readme to find password info files: " oldPassword
+		
 	fi
 	elif [ $task = "8" ]
 	then
+		echo "Getting rid of shosts files"
+		find / -name "*.shosts" -type f -delete
+		find / -name "shosts.equiv" -type f -delete
+		
+		echo "Stopping startup scripts"
+		echo > /etc/rc.local
+		echo "exit 0" >> /etc/rc.local
+		chown root:root /etc/rc.local
+		chmod 640 /etc/rc.local
+		
+		echo "Removing scripts from /bin"
+		find /bin/ -name "*.sh" -type f -delete
+		
+		echo "Removing crontabs and changing crontab access"
+		crontab -r
+		rm /etc/cron.deny
+		rm /etc/at.deny
+		echo "root" > cron.allow
+		echo "root" > cron.deny
+		
+		echo "Installing rootkit tools"
+		apt-get install chkrootkit
+		apt-get install rkhunter
+		
+		echo "Installing antivirus"
 		apt-get install clamav
+		freshclam
 		read -p "Do virus scan now(could take a while)? (y/n) " virusPrompt
 		if [ $virusPrompt = "y" ]
 		then
