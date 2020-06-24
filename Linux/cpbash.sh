@@ -295,6 +295,9 @@ do
 			done
 		fi
 		
+		echo "Not allowing unauthenticated packages"
+		append_file /etc/apt/apt.conf.d/01-vendor-ubuntu 'APT::Get::AllowUnauthenticated "false";'
+		
 		echo "Disabling ctrl+alt+delete key sequence"
 		systemctl mask ctrl-alt-del.target
 		systemctl daemon-reload
