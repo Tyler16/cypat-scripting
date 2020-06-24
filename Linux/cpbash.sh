@@ -295,6 +295,10 @@ do
 			done
 		fi
 		
+		echo "Disabling ctrl+alt+delete key sequence"
+		systemctl mask ctrl-alt-del.target
+		systemctl daemon-reload
+		
 		echo "Removing hacking tools and vulnerable services(Includes CIS 16 1.5.4)"
 		prelink -ua
 		apt-get purge aircrack-ng alien apktool autofs crack crack-common crack-md5 fcrackzip gamconqueror hashcat hydra* irpas *inetd inetutils* john* *kismet* lcrack logkeys *macchanger* *netcat* ncat nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* pdfcrack pixiewps portmap prelink rarcrack rsh-server rpcbind sbd sipcrack snmp socat sock socket sucrack tftpd-hpa vnc4server vncsnapshot vtgrab wireshark yersinia *zeitgeist*
