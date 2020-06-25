@@ -576,6 +576,9 @@ do
 	then
 		apt-get install auditd
 		auditctl -e 1
+		chown root:root /etc/audit
+		chmod 0700 /etc/audit
+		
 	fi
 	elif [ $task = "7" ]
 	then
@@ -661,7 +664,7 @@ do
 		sysctl -w kernel.randomize_va_space=2
 		
 		echo "Configuring AppArmor (CIS 16 1.6(not using selinux))"
-		apt-get install apparmor apparmor-profiles
+		apt-get install apparmor apparmor-profiles libpam-apparmor
 		aa-enforce /etc/apparmor.d/*
 		rewrite_file grub /etc/default/grub
 		
@@ -676,14 +679,6 @@ do
 		echo "Authorized uses only. All activity may be monitored and reported." > /etc/issue.net
 		chown root:root /etc/issue.net
 		chmod 640 /etc/issue.net
-		touch /etc/dconf/profile/gdm
-		echo "user-db:user" >> /etc/dconf/profile/gdm
-		echo "system-db:gdm" >> /etc/dconf/profile/gdm
-		echo "file-db:/usr/share/gdm/greeter-dconf-defaults" >> /etc/dconf/profile/gdm
-		mkdir /etc/dconf/db/gdm.d
-		cp 01-banner-message /etc/dconf/db/gdm.d
-		update-grub
-		dconf update
 	fi
 	elif [ $task = "10" ]
 	then
