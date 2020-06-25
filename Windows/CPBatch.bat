@@ -32,6 +32,7 @@ choco uninstall utorrent -y
 choco uninstall teamviewer -y
 choco uninstall nmap -y
 choco uninstall kodi -y
+choco uninstall winrar -y
 
 ECHO "Disabling insecure services"
 DISM /online /disable-feature /featurename:TelnetClient
