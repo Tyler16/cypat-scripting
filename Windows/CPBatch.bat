@@ -13,6 +13,9 @@ net accounts /minpwlen:8 /maxpwage:30 /minpwage:10 /lockoutduration:30 /lockoutt
 ECHO "Enabling firewall"
 netsh advfirewall set allprofiles state on
 
+ECHO "Flushing DNS cache"
+ipconfig /flushdns
+
 ECHO "Installing chocolatey and managing applications"
 @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command " [System.Net.ServicePointManager]::SecurityProtocol = 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
 choco install notepadplusplus
@@ -46,3 +49,6 @@ sc config "RemoteRegistry" start= disabled
 ECHO "Enabling all audit policies"
 auditpol /set /category:* /success:enable
 auditpol /set /category:* /failure:enable
+
+ECHO "Enabling UAC"
+reg ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v EnableLUA /t REG_DWORD /d 1 /f
