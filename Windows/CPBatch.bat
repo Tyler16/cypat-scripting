@@ -11,7 +11,7 @@ ECHO "Setting (some) password policies"
 net accounts /minpwlen:8 /maxpwage:30 /minpwage:10 /lockoutduration:30 /lockoutthreshold:5 /lockoutwindow:30
 
 ECHO "Enabling firewall"
-netsh advfirewall set all profiles state on
+netsh advfirewall set allprofiles state on
 
 ECHO "Installing chocolatey and managing applications"
 @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command " [System.Net.ServicePointManager]::SecurityProtocol = 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
