@@ -170,7 +170,7 @@ do
 			read -ap "Enter usernames of users that need to be created with a single space seperating each user: " newUsers
 			for user in "${newUsers[@]}"
 			do
-				adduser $user
+				useradd $user
 				read -p "Should user be an admin? (y/n) " adminPrompt
 				if [ adminPrompt = "y" ]
 				then
@@ -188,11 +188,11 @@ do
 			read -ap "Enter all groups that need to be created with a single space seperating each group: " newGroupNames
 			for group in "${newGroupNames[@]}"
 			do
-				addgroup $group
+				groupadd $group
 				read -ap "Enter users that belong in ${group} with a single space seperating each user: " groupUsers
 				for user in "${groupUsers[@]}"
 				do
-					adduser $user $group
+					usermod -a -G $group $user
 				done
 			done
 		fi
@@ -412,6 +412,15 @@ do
 			ufw allow http
 			ufw allow https
 			rm -r /var/www/*
+			groupadd -r apache
+			useradd apache -r -G apache -d /var/www -s /sbin/nologin
+			passwd -l apache
+			chown -R root:root /var/lock/apache2
+			chmod 740 /var/lock/apache2
+			chown -R root:root /var/run/apache2
+			chmod 740 /var/run/apache2
+			chown -R root:apache /var/log/apache2 
+			chmod 740 /var/log/apache2
 		fi
 		elif [ $ApachePrompt = "n" ]
 		then
