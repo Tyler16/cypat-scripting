@@ -496,6 +496,7 @@ do
 				apt-get purge postgresql
 				apt-get install mysql-server
 				mysql_secure_installation
+				rewrite_file my.cnf /etc/mysql/my.cnf
 			fi
 			elif [ $SQLPackage = "2" ]
 			then
