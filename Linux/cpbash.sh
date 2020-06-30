@@ -282,6 +282,15 @@ do
 		sysctl -w net.ipv6.conf.all.accept_redirects=0
 		sysctl -w nerects=0
 		sysctl -w net.ipv4.route.flush=1
+		
+		echo "Preventing IP Spoofing"
+		chmod 777 /etc/host.conf
+		echo "nospoof on" >> /etc/host.conf
+		chown root:root /etc/host.conf
+		chmod 600 /etc/host.conf
+		
+		echo "Disabling IP forwarding"
+		echo "0" > /proc/sys/net/ipv4/ip_forward
 	fi
 	elif [ $task = "4" ]
 	then net.ipv6.conf.default.accept_redi
@@ -592,6 +601,114 @@ do
 	fi
 	elif [ $task = "7" ]
 	then
+		echo "Finding and listing media files"
+		touch media-files.txt
+		find / -type f -iname "*.3g2" >> media-files.txt
+		find / -type f -iname "*.3gp" >> media-files.txt
+		find / -type f -iname "*.mov" >> media-files.txt
+		find / -type f -iname "*.amv" >> media-files.txt
+		find / -type f -iname "*.asf" >> media-files.txt
+		find / -type f -iname "*.avi" >> media-files.txt
+		find / -type f -iname "*.drc" >> media-files.txt
+		find / -type f -iname "*.flv" >> media-files.txt
+		find / -type f -iname "*.f4v" >> media-files.txt
+		find / -type f -iname "*.f4p" >> media-files.txt
+		find / -type f -iname "*.f4a" >> media-files.txt
+		find / -type f -iname "*.f4b" >> media-files.txt
+		find / -type f -iname "*.m4v" >> media-files.txt
+		find / -type f -iname "*.mkv" >> media-files.txt
+		find / -type f -iname "*.mng" >> media-files.txt
+		find / -type f -iname "*.mov" >> media-files.txt
+		find / -type f -iname "*.mp4" >> media-files.txt
+		find / -type f -iname "*.m4p" >> media-files.txt
+		find / -type f -iname "*.m4v" >> media-files.txt
+		find / -type f -iname "*.mpg" >> media-files.txt
+		find / -type f -iname "*.mp2" >> media-files.txt
+		find / -type f -iname "*.mpeg" >> media-files.txt
+		find / -type f -iname "*.mpe" >> media-files.txt
+		find / -type f -iname "*.mpv" >> media-files.txt
+		find / -type f -iname "*.m2v" >> media-files.txt
+		find / -type f -iname "*.MTS" >> media-files.txt
+		find / -type f -iname "*.M2TS" >> media-files.txt
+		find / -type f -iname "*.mxf" >> media-files.txt
+		find / -type f -iname "*.nsv" >> media-files.txt
+		find / -type f -iname "*.ogg" >> media-files.txt
+		find / -type f -iname "*.ogv" >> media-files.txt
+		find / -type f -iname "*.qt" >> media-files.txt
+		find / -type f -iname "*.rm" >> media-files.txt
+		find / -type f -iname "*.rmvb" >> media-files.txt
+		find / -type f -iname "*.roq" >> media-files.txt
+		find / -type f -iname "*.svi" >> media-files.txt
+		find / -type f -iname "*.ts" >> media-files.txt
+		find / -type f -iname "*.vob" >> media-files.txt
+		find / -type f -iname "*.webm" >> media-files.txt
+		find / -type f -iname "*.wmv" >> media-files.txt
+		find / -type f -iname "*.yuv" >> media-files.txt
+		
+		find / -type f -iname "*.8svx" >> media-files.txt
+		find / -type f -iname "*.aa" >> media-files.txt
+		find / -type f -iname "*.aac" >> media-files.txt
+		find / -type f -iname "*.aax" >> media-files.txt
+		find / -type f -iname "*.act" >> media-files.txt
+		find / -type f -iname "*.aiff" >> media-files.txt
+		find / -type f -iname "*.alac" >> media-files.txt
+		find / -type f -iname "*.amr" >> media-files.txt
+		find / -type f -iname "*.ape" >> media-files.txt
+		find / -type f -iname "*.au" >> media-files.txt
+		find / -type f -iname "*.awb" >> media-files.txt
+		find / -type f -iname "*.cda" >> media-files.txt
+		find / -type f -iname "*.dct" >> media-files.txt
+		find / -type f -iname "*.dss" >> media-files.txt
+		find / -type f -iname "*.dvf" >> media-files.txt
+		find / -type f -iname "*.flac" >> media-files.txt
+		find / -type f -iname "*.gsm" >> media-files.txt
+		find / -type f -iname "*.iklax" >> media-files.txt
+		find / -type f -iname "*.ivs" >> media-files.txt
+		find / -type f -iname "*.m4a" >> media-files.txt
+		find / -type f -iname "*.m4b" >> media-files.txt
+		find / -type f -iname "*.mmf" >> media-files.txt
+		find / -type f -iname "*.mp3" >> media-files.txt
+		find / -type f -iname "*.mpc" >> media-files.txt
+		find / -type f -iname "*.msv" >> media-files.txt
+		find / -type f -iname "*.nmf" >> media-files.txt
+		find / -type f -iname "*.nsf" >> media-files.txt
+		find / -type f -iname "*.oga" >> media-files.txt
+		find / -type f -iname "*.opus" >> media-files.txt
+		find / -type f -iname "*.mogg" >> media-files.txt
+		find / -type f -iname "*.ra" >> media-files.txt
+		find / -type f -iname "*.raw" >> media-files.txt
+		find / -type f -iname "*.rf64" >> media-files.txt
+		find / -type f -iname "*.sln" >> media-files.txt
+		find / -type f -iname "*.tta" >> media-files.txt
+		find / -type f -iname "*.voc" >> media-files.txt
+		find / -type f -iname "*.vox" >> media-files.txt
+		find / -type f -iname "*.wav" >> media-files.txt
+		find / -type f -iname "*.wma" >> media-files.txt
+		find / -type f -iname "*.wv" >> media-files.txt
+		
+		find / -type f -iname "*.bmp" >> media-files.txt
+		find / -type f -iname "*.eps" >> media-files.txt
+		find / -type f -iname "*.gif" >> media-files.txt
+		find / -type f -iname "*.gifv" >> media-files.txt
+		find / -type f -iname "*.heif" >> media-files.txt
+		find / -type f -iname "*.img" >> media-files.txt
+		find / -type f -iname "*.jpg" >> media-files.txt
+		find / -type f -iname "*.jpeg" >> media-files.txt
+		find / -type f -iname "*.jfif" >> media-files.txt
+		find / -type f -iname "*.png" >> media-files.txt
+		find / -type f -iname "*.tif" >> media-files.txt
+		find / -type f -iname "*.tiff" >> media-files.txt
+		find / -type f -iname "*.webp" >> media-files.txt
+		
+		for $file in `cat media-files.txt`
+		do
+			read -p "Remove file ${$file} (say no if cyberpatriot file)? (y/n)" fileRemovePrompt
+			if [ fileRemovePrompt = "y" ]
+			then
+				rm -rf $file
+			fi
+		done
+		
 		read -p "Enter a password of any admin from the readme to find password info files: " oldPassword
 		
 	fi
