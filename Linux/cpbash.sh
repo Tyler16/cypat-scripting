@@ -40,8 +40,8 @@ filesystems=(cramfs freevxfs jffs2 hfs hfsplus udf)
 
 echo "What OS are you using?"
 echo "1. Ubuntu 16"
-echo "2. Ubuntu 14"
-echo "3. Debian"
+echo "2. Ubuntu 18"
+echo "3. Debian 9"
 read -p "> " OS
 
 read -p "Enter a password that will be used for every user(except you): " password
@@ -478,19 +478,6 @@ do
 		else
 			echo "Invalid option"
 		fi
-    
-		read -p "Is DHCP a critical service? (y/n) " DHCPPrompt
-		if [ $DHCPPrompt = "y" ]
-		then
-			echo "DHCP not configured yet"
-		fi
-		elif [ $DHCPPrompt = "n" ]
-		then
-			echo "DHCP not configured yet"
-		fi
-		else
-			echo "Invalid option"
-		fi
 		
 		read -p "Is SQL a critical service? (y/n) " SQLPrompt
 		if [ $SQLPrompt = "y" ]
@@ -563,6 +550,8 @@ do
 		fi
 		elif [ $mailPrompt = "n" ]
 		then
+			apt-get purge 
+			apt-get purge dovecot
 			ufw deny smtp
 			ufw deny pop2
 			ufw deny pop3
@@ -708,9 +697,6 @@ do
 				rm -rf $file
 			fi
 		done
-		
-		read -p "Enter a password of any admin from the readme to find password info files: " oldPassword
-		
 	fi
 	elif [ $task = "8" ]
 	then
@@ -731,8 +717,8 @@ do
 		crontab -r
 		rm /etc/cron.deny
 		rm /etc/at.deny
-		echo "root" > cron.allow
-		echo "root" > cron.deny
+		echo "root" > /etc/cron.allow
+		echo "root" > /etc/at.allow
 		
 		echo "Installing rootkit tools"
 		apt-get install chkrootkit
