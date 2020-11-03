@@ -1,11 +1,11 @@
 #!/bin/bash
-set_permissions {
+set_permissions () {
 	file=$1
 	chown root:root
 	chmod 0600 $file
 }
 
-append_file {
+append_file () {
 	file=$1
 	text=$2
 	chmod 777 $file
