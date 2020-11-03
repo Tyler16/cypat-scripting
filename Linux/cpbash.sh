@@ -19,7 +19,7 @@ rewrite_file {
 	file=$2
 	chmod 777 $file
 	chattr -ai $file
-	cat ./$filename > $file
+	cat ./ReferenceFiles/$filename > $file
 	set_permissions $file
 }
 
