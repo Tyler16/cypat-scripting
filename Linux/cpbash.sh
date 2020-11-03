@@ -54,14 +54,15 @@ do
 	echo "Choose a task"
 	echo "1. Updates"
 	echo "2. Users and Passwords"
-	echo "3. Network Security"
-	echo "4. Package Management"
-	echo "5. Critical Services"
-	echo "6. Auditing"
-	echo "7. Prohibited files"
-	echo "8. Virus, Rootkits and unwanted Scripts"
-	echo "9. Booting and File Mounting"
-	echo "10. End Script"
+	echo "3. Local Policies"
+	echo "4. Network Security"
+	echo "5. Package Management"
+	echo "6. Critical Services"
+	echo "7. Auditing"
+	echo "8. Prohibited files"
+	echo "9. Virus, Rootkits and unwanted Scripts"
+	echo "10. Booting and File Mounting"
+	echo "11. End Script"
 	read -p "> " task
 	if [ $task = "1" ]
 	then
@@ -84,7 +85,6 @@ do
 			apt-get upgrade -y
 			apt-get dist-upgrade -y
 		fi
-	fi
 	elif [ $task = "2" ]
 	then
 		echo "Creating file with list of system users"
@@ -96,7 +96,6 @@ do
 		if [ $readmeUsers = "y" ]
 		then
 			echo "ReadMe user system not created yet."
-		fi
 		elif [ $readmeUsers = "n" ]
 		then
 			read -ap "Enter all users in readme with a single space in between each user(including admins): " users
@@ -145,15 +144,14 @@ do
 						gpasswd -a $user adm
 						gpasswd -a $user lpadmin
 						gpasswd -a $user sambashare
-					fi
 					else
 						gpasswd -d $user sudo
 						gpasswd -d $user adm
 						gpasswd -d $user lpadmin
 						gpasswd -d $user sambashare
 					fi
-				fi
 				else
+					read -ap "Delete user ${user}? (y/n) " deleteUserPrompt
 					echo "Deleting user $user"
 					slay $user
 					deluser $user
@@ -211,7 +209,8 @@ do
 		echo "Locking root account and setting password"
 		echo "root:${password}" | chpasswd
 		passwd -l root
-		
+	elif [ $task = "3" ]
+	then
 		echo "Setting up lightdm file"
 		rm /etc/lightdm/lightdm.conf
 		rm -R /etc/lightdm/lightdm.conf.d/*
@@ -234,12 +233,14 @@ do
 		
 		for file in /etc/sudoers.d/*
 		do
-			echo "Delete ${file}(only delete if not main sudoers file)? (y/n)"
-			rm $file
+			read -p "Remove file ${file} (Only remove if not cyberpatriot or main file)? (y/n) " sudoersPrompt
+			if [ $sudoersPrompt = "y"]
+			then
+				rm $file
+			fi
 		done
 		visudo
-	fi
-	elif [ $task = "3" ]
+	elif [ $task = "4" ]
 	then
 		echo "Setting up firewall"
 		apt-get install ufw
@@ -291,9 +292,8 @@ do
 		
 		echo "Disabling IP forwarding"
 		echo "0" > /proc/sys/net/ipv4/ip_forward
-	fi
-	elif [ $task = "4" ]
-	then net.ipv6.conf.default.accept_redi
+	elif [ $task = "5" ]
+	then
 		read -p "Are there any extra packages that need to be installed? (y/n) " packagePrompt
 		if [ packagePrompt="y" ]
 		then
@@ -320,8 +320,7 @@ do
 		
 		echo "Installing security applications"
 		apt-get install gnupg
-	fi
-	elif [ $task = "5" ]
+	elif [ $task = "6" ]
 	then
 		read -p "Is SSH a critical service? (y/n) " SSHPrompt
 		if [ $SSHPrompt = "y" ]
@@ -342,14 +341,12 @@ do
 			chmod 0700 ~/.ssh
 			chown root:root ~/.ssh
 			ssh-keygen -t rsa
-		fi
 		elif [ $SSHPrompt = "n" ]
 		then
 			apt-get purge ssh
 			apt-get purge openssh
 			apt-get purge openssh-server
 			ufw deny ssh
-		fi
 		else
 			echo "Invalid option"
 		fi
@@ -374,7 +371,6 @@ do
 				rewrite_file vsftpd.conf /etc/vsftpd.conf
 				set_permissions /etc/ssl/private/vsftpdkey.pem
 				set_permissions /etc/ssl/certs/vsftpdcert.pem
-			fi
 			elif [ $FTPApplication = "2" ]
 			then
 				apt-get install proftpd-basic
@@ -383,7 +379,6 @@ do
 				rewrite_file proftpd.conf /etc/proftpd/proftpd.conf
 				set_permissions /etc/ssl/private/proftpdkey.pem
 				set_permissions /etc/ssl/certs/proftpdcert.pem
-			fi
 			elif [ $FTPApplication = "3" ]
 			then
 				apt-get install pure-ftpd
@@ -391,16 +386,13 @@ do
 				/usr/local/sbin/pure-ftpd --tls=2
 				set_permissions root:root /etc/ssl/private/pureftpdkey.pem
 				set_permissions /etc/ssl/certs/pureftpdcert.pem
-			fi
 			elif [ $FTPApplication = "4" ]
 			then
 				read -p "Enter application for FTP and search how to secure said application: " FTPapp
 				apt-get install $FTPapp
-			fi
 			else
 				echo "Invalid option"
 			fi
-		fi
 		elif [ $FTPPrompt = "n" ]
 		then
 			apt-get purge *ftp*
@@ -409,7 +401,6 @@ do
 			ufw deny saft
 			ufw deny ftps-data
 			ufw deny ftps
-		fi
 		else
 			echo "Invalid option"
 		fi
@@ -420,7 +411,6 @@ do
 			apt-get install apache2
 			ufw allow http
 			ufw allow https
-			rm -r /var/www/*
 			groupadd -r apache
 			useradd apache -r -G apache -d /var/www -s /sbin/nologin
 			passwd -l apache
@@ -430,14 +420,12 @@ do
 			chmod 740 /var/run/apache2
 			chown -R root:apache /var/log/apache2 
 			chmod 740 /var/log/apache2
-		fi
 		elif [ $ApachePrompt = "n" ]
 		then
 			apt-get purge apache2
 			ufw deny http
 			ufw deny https
 			rm -r /var/www/*
-		fi
 		else
 			echo "Invalid option"
 		fi
@@ -450,7 +438,6 @@ do
 			ufw allow netbios-dgm
 			ufw allow netbios-ssn
 			ufw allow microsoft-ds
-		fi
 		elif [ $SambaPrompt = "n" ]
 		then
 			apt-get purge samba*
@@ -459,7 +446,6 @@ do
 			ufw deny netbios-dgm
 			ufw deny netbios-ssn
 			ufw deny microsoft-ds
-		fi
 		else
 			echo "Invalid option"
 		fi
@@ -469,12 +455,10 @@ do
 		then
 			apt-get install bind9
 			ufw allow domain
-		fi
 		elif [ $DNSPrompt = "n" ]
 		then
 			apt-get purge bind9
 			ufw deny domain
-		fi
 		else
 			echo "Invalid option"
 		fi
@@ -493,21 +477,17 @@ do
 				apt-get install mysql-server
 				mysql_secure_installation
 				rewrite_file my.cnf /etc/mysql/my.cnf
-			fi
 			elif [ $SQLPackage = "2" ]
 			then
 				apt-get purge mysql-server
 				apt-get install postgresql
-			fi
 			elif [ $SQLPackage = "3" ]
 			then
 				read -p "Enter package name and look up how to secure it: " SQLApplication
 				apt-get install $SQLApplication
-			fi
 			else
 				echo "Invalid response"
 			fi
-		fi
 		elif [ $SQLPrompt = "n" ]
 		then
 			ufw deny ms-sql-s
@@ -517,7 +497,6 @@ do
 			ufw deny postgresql
 			apt-get purge mysql*
 			apt-get purge postgresql
-		fi
 		else
 			echo "Invalid option"
 		fi
@@ -527,13 +506,11 @@ do
 		then
 			apt-get install telnet
 			ufw allow telnet
-		fi
 		elif [ $TelnetPrompt = "n" ]
 		then
 			apt-get purge telnet
 			apt-get purge telnetd
 			ufw deny telnet
-		fi
 		else
 			echo "Invalid option"
 		fi
@@ -547,10 +524,8 @@ do
 			ufw allow imap2
 			ufw allow imaps
 			ufw allow pop3s
-		fi
 		elif [ $mailPrompt = "n" ]
 		then
-			apt-get purge 
 			apt-get purge dovecot
 			ufw deny smtp
 			ufw deny pop2
@@ -558,7 +533,6 @@ do
 			ufw deny imap2
 			ufw deny imaps
 			ufw deny pop3s
-		fi
 		else
 			echo "Invalid option"
 		fi
@@ -569,136 +543,157 @@ do
 			ufw allow ipp
 			ufw allow cups
 			ufw allow printer
-		fi
 		elif [ $printPrompt = "n" ]
 		then
 			ufw deny ipp
 			ufw deny cups
 			ufw deny printer
-		fi
 		else
 			echo "Invalid option"
 		fi
-	fi
-	elif [ $task = "6" ]
+	elif [ $task = "7" ]
 	then
 		apt-get install auditd
 		auditctl -e 1
 		chown root:root /etc/audit
 		chmod 0700 /etc/audit
-		
-	fi
-	elif [ $task = "7" ]
+	elif [ $task = "8" ]
 	then
+		read -p "Run a deep scan(takes longer)? (y/n) " scanType
 		echo "Finding and listing media files"
 		touch media-files.txt
-		find / -type f -iname "*.3g2" >> media-files.txt
-		find / -type f -iname "*.3gp" >> media-files.txt
-		find / -type f -iname "*.mov" >> media-files.txt
-		find / -type f -iname "*.amv" >> media-files.txt
-		find / -type f -iname "*.asf" >> media-files.txt
-		find / -type f -iname "*.avi" >> media-files.txt
-		find / -type f -iname "*.drc" >> media-files.txt
-		find / -type f -iname "*.flv" >> media-files.txt
-		find / -type f -iname "*.f4v" >> media-files.txt
-		find / -type f -iname "*.f4p" >> media-files.txt
-		find / -type f -iname "*.f4a" >> media-files.txt
-		find / -type f -iname "*.f4b" >> media-files.txt
-		find / -type f -iname "*.m4v" >> media-files.txt
-		find / -type f -iname "*.mkv" >> media-files.txt
-		find / -type f -iname "*.mng" >> media-files.txt
-		find / -type f -iname "*.mov" >> media-files.txt
-		find / -type f -iname "*.mp4" >> media-files.txt
-		find / -type f -iname "*.m4p" >> media-files.txt
-		find / -type f -iname "*.m4v" >> media-files.txt
-		find / -type f -iname "*.mpg" >> media-files.txt
-		find / -type f -iname "*.mp2" >> media-files.txt
-		find / -type f -iname "*.mpeg" >> media-files.txt
-		find / -type f -iname "*.mpe" >> media-files.txt
-		find / -type f -iname "*.mpv" >> media-files.txt
-		find / -type f -iname "*.m2v" >> media-files.txt
-		find / -type f -iname "*.MTS" >> media-files.txt
-		find / -type f -iname "*.M2TS" >> media-files.txt
-		find / -type f -iname "*.mxf" >> media-files.txt
-		find / -type f -iname "*.nsv" >> media-files.txt
-		find / -type f -iname "*.ogg" >> media-files.txt
-		find / -type f -iname "*.ogv" >> media-files.txt
-		find / -type f -iname "*.qt" >> media-files.txt
-		find / -type f -iname "*.rm" >> media-files.txt
-		find / -type f -iname "*.rmvb" >> media-files.txt
-		find / -type f -iname "*.roq" >> media-files.txt
-		find / -type f -iname "*.svi" >> media-files.txt
-		find / -type f -iname "*.ts" >> media-files.txt
-		find / -type f -iname "*.vob" >> media-files.txt
-		find / -type f -iname "*.webm" >> media-files.txt
-		find / -type f -iname "*.wmv" >> media-files.txt
-		find / -type f -iname "*.yuv" >> media-files.txt
 		
-		find / -type f -iname "*.8svx" >> media-files.txt
-		find / -type f -iname "*.aa" >> media-files.txt
-		find / -type f -iname "*.aac" >> media-files.txt
-		find / -type f -iname "*.aax" >> media-files.txt
-		find / -type f -iname "*.act" >> media-files.txt
-		find / -type f -iname "*.aiff" >> media-files.txt
-		find / -type f -iname "*.alac" >> media-files.txt
-		find / -type f -iname "*.amr" >> media-files.txt
-		find / -type f -iname "*.ape" >> media-files.txt
-		find / -type f -iname "*.au" >> media-files.txt
-		find / -type f -iname "*.awb" >> media-files.txt
-		find / -type f -iname "*.cda" >> media-files.txt
-		find / -type f -iname "*.dct" >> media-files.txt
-		find / -type f -iname "*.dss" >> media-files.txt
-		find / -type f -iname "*.dvf" >> media-files.txt
-		find / -type f -iname "*.flac" >> media-files.txt
-		find / -type f -iname "*.gsm" >> media-files.txt
-		find / -type f -iname "*.iklax" >> media-files.txt
-		find / -type f -iname "*.ivs" >> media-files.txt
-		find / -type f -iname "*.m4a" >> media-files.txt
-		find / -type f -iname "*.m4b" >> media-files.txt
-		find / -type f -iname "*.mmf" >> media-files.txt
-		find / -type f -iname "*.mp3" >> media-files.txt
-		find / -type f -iname "*.mpc" >> media-files.txt
-		find / -type f -iname "*.msv" >> media-files.txt
-		find / -type f -iname "*.nmf" >> media-files.txt
-		find / -type f -iname "*.nsf" >> media-files.txt
-		find / -type f -iname "*.oga" >> media-files.txt
-		find / -type f -iname "*.opus" >> media-files.txt
-		find / -type f -iname "*.mogg" >> media-files.txt
-		find / -type f -iname "*.ra" >> media-files.txt
-		find / -type f -iname "*.raw" >> media-files.txt
-		find / -type f -iname "*.rf64" >> media-files.txt
-		find / -type f -iname "*.sln" >> media-files.txt
-		find / -type f -iname "*.tta" >> media-files.txt
-		find / -type f -iname "*.voc" >> media-files.txt
-		find / -type f -iname "*.vox" >> media-files.txt
-		find / -type f -iname "*.wav" >> media-files.txt
-		find / -type f -iname "*.wma" >> media-files.txt
-		find / -type f -iname "*.wv" >> media-files.txt
-		
-		find / -type f -iname "*.bmp" >> media-files.txt
-		find / -type f -iname "*.eps" >> media-files.txt
-		find / -type f -iname "*.gif" >> media-files.txt
-		find / -type f -iname "*.gifv" >> media-files.txt
-		find / -type f -iname "*.heif" >> media-files.txt
-		find / -type f -iname "*.img" >> media-files.txt
-		find / -type f -iname "*.jpg" >> media-files.txt
-		find / -type f -iname "*.jpeg" >> media-files.txt
-		find / -type f -iname "*.jfif" >> media-files.txt
-		find / -type f -iname "*.png" >> media-files.txt
-		find / -type f -iname "*.tif" >> media-files.txt
-		find / -type f -iname "*.tiff" >> media-files.txt
-		find / -type f -iname "*.webp" >> media-files.txt
-		
-		for $file in `cat media-files.txt`
-		do
-			read -p "Remove file ${$file} (say no if cyberpatriot file)? (y/n)" fileRemovePrompt
-			if [ fileRemovePrompt = "y" ]
-			then
-				rm -rf $file
-			fi
-		done
-	fi
-	elif [ $task = "8" ]
+		if [ $scanType = "y" ]
+		then
+			find / -type f -iname "*.3g2" >> media-files.txt
+			find / -type f -iname "*.3gp" >> media-files.txt
+			find / -type f -iname "*.mov" >> media-files.txt
+			find / -type f -iname "*.amv" >> media-files.txt
+			find / -type f -iname "*.asf" >> media-files.txt
+			find / -type f -iname "*.avi" >> media-files.txt
+			find / -type f -iname "*.drc" >> media-files.txt
+			find / -type f -iname "*.flv" >> media-files.txt
+			find / -type f -iname "*.f4v" >> media-files.txt
+			find / -type f -iname "*.f4p" >> media-files.txt
+			find / -type f -iname "*.f4a" >> media-files.txt
+			find / -type f -iname "*.f4b" >> media-files.txt
+			find / -type f -iname "*.m4v" >> media-files.txt
+			find / -type f -iname "*.mkv" >> media-files.txt
+			find / -type f -iname "*.mng" >> media-files.txt
+			find / -type f -iname "*.mov" >> media-files.txt
+			find / -type f -iname "*.mp4" >> media-files.txt
+			find / -type f -iname "*.m4p" >> media-files.txt
+			find / -type f -iname "*.m4v" >> media-files.txt
+			find / -type f -iname "*.mpg" >> media-files.txt
+			find / -type f -iname "*.mp2" >> media-files.txt
+			find / -type f -iname "*.mpeg" >> media-files.txt
+			find / -type f -iname "*.mpe" >> media-files.txt
+			find / -type f -iname "*.mpv" >> media-files.txt
+			find / -type f -iname "*.m2v" >> media-files.txt
+			find / -type f -iname "*.MTS" >> media-files.txt
+			find / -type f -iname "*.M2TS" >> media-files.txt
+			find / -type f -iname "*.mxf" >> media-files.txt
+			find / -type f -iname "*.nsv" >> media-files.txt
+			find / -type f -iname "*.ogg" >> media-files.txt
+			find / -type f -iname "*.ogv" >> media-files.txt
+			find / -type f -iname "*.qt" >> media-files.txt
+			find / -type f -iname "*.rm" >> media-files.txt
+			find / -type f -iname "*.rmvb" >> media-files.txt
+			find / -type f -iname "*.roq" >> media-files.txt
+			find / -type f -iname "*.svi" >> media-files.txt
+			find / -type f -iname "*.ts" >> media-files.txt
+			find / -type f -iname "*.vob" >> media-files.txt
+			find / -type f -iname "*.webm" >> media-files.txt
+			find / -type f -iname "*.wmv" >> media-files.txt
+			find / -type f -iname "*.yuv" >> media-files.txt
+
+			find / -type f -iname "*.8svx" >> media-files.txt
+			find / -type f -iname "*.aa" >> media-files.txt
+			find / -type f -iname "*.aac" >> media-files.txt
+			find / -type f -iname "*.aax" >> media-files.txt
+			find / -type f -iname "*.act" >> media-files.txt
+			find / -type f -iname "*.aiff" >> media-files.txt
+			find / -type f -iname "*.alac" >> media-files.txt
+			find / -type f -iname "*.amr" >> media-files.txt
+			find / -type f -iname "*.ape" >> media-files.txt
+			find / -type f -iname "*.au" >> media-files.txt
+			find / -type f -iname "*.awb" >> media-files.txt
+			find / -type f -iname "*.cda" >> media-files.txt
+			find / -type f -iname "*.dct" >> media-files.txt
+			find / -type f -iname "*.dss" >> media-files.txt
+			find / -type f -iname "*.dvf" >> media-files.txt
+			find / -type f -iname "*.flac" >> media-files.txt
+			find / -type f -iname "*.gsm" >> media-files.txt
+			find / -type f -iname "*.iklax" >> media-files.txt
+			find / -type f -iname "*.ivs" >> media-files.txt
+			find / -type f -iname "*.m4a" >> media-files.txt
+			find / -type f -iname "*.m4b" >> media-files.txt
+			find / -type f -iname "*.mmf" >> media-files.txt
+			find / -type f -iname "*.mp3" >> media-files.txt
+			find / -type f -iname "*.mpc" >> media-files.txt
+			find / -type f -iname "*.msv" >> media-files.txt
+			find / -type f -iname "*.nmf" >> media-files.txt
+			find / -type f -iname "*.nsf" >> media-files.txt
+			find / -type f -iname "*.oga" >> media-files.txt
+			find / -type f -iname "*.opus" >> media-files.txt
+			find / -type f -iname "*.mogg" >> media-files.txt
+			find / -type f -iname "*.ra" >> media-files.txt
+			find / -type f -iname "*.raw" >> media-files.txt
+			find / -type f -iname "*.rf64" >> media-files.txt
+			find / -type f -iname "*.sln" >> media-files.txt
+			find / -type f -iname "*.tta" >> media-files.txt
+			find / -type f -iname "*.voc" >> media-files.txt
+			find / -type f -iname "*.vox" >> media-files.txt
+			find / -type f -iname "*.wav" >> media-files.txt
+			find / -type f -iname "*.wma" >> media-files.txt
+			find / -type f -iname "*.wv" >> media-files.txt
+
+			find / -type f -iname "*.bmp" >> media-files.txt
+			find / -type f -iname "*.eps" >> media-files.txt
+			find / -type f -iname "*.gif" >> media-files.txt
+			find / -type f -iname "*.gifv" >> media-files.txt
+			find / -type f -iname "*.heif" >> media-files.txt
+			find / -type f -iname "*.img" >> media-files.txt
+			find / -type f -iname "*.jpeg" >> media-files.txt
+			find / -type f -iname "*.jpg" >> media-files.txt
+			find / -type f -iname "*.jfif" >> media-files.txt
+			find / -type f -iname "*.png" >> media-files.txt
+			find / -type f -iname "*.tif" >> media-files.txt
+			find / -type f -iname "*.tiff" >> media-files.txt
+			find / -type f -iname "*.webp" >> media-files.txt
+
+			for file in `cat media-files.txt`
+			do
+				read -p "Remove file ${$file} (say no if cyberpatriot file)? (y/n)" fileRemovePrompt
+				if [ fileRemovePrompt = "y" ]
+				then
+					rm -rf $file
+				fi
+			done
+		elif [ $scanType = "n" ]
+		then
+			find /home -type f -iname "*.mov" >> media-files.txt
+			find /home -type f -iname "*.mp4" >> media-files.txt
+			find /home -type f -iname "*.webm" >> media-files.txt
+			find /home -type f -iname "*.ogg" >> media-files.txt
+			find /home -type f -iname "*.mp3" >> media-files.txt
+			find /home -type f -iname "*.wav" >> media-files.txt
+			find /home -type f -iname "*.gif" >> media-files.txt
+			find /home -type f -iname "*.jpeg" >> media-files.txt
+			find /home -type f -iname "*.jpg" >> media-files.txt
+			find /home -type f -iname "*.png" >> media-files.txt
+			for file in `cat media-files.txt`
+			do
+				read -p "Remove file ${$file} (say no if cyberpatriot file)? (y/n)" fileRemovePrompt
+				if [ fileRemovePrompt = "y" ]
+				then
+					rm -rf $file
+				fi
+			done
+		else
+			echo "Invalid response, skipping"
+		fi
+	elif [ $task = "9" ]
 	then
 		echo "Getting rid of shosts files"
 		find / -name "*.shosts" -type f -delete
@@ -732,8 +727,7 @@ do
 		then
 			clamscan
 		fi
-	fi
-	elif [ $task = "9" ]
+	elif [ $task = "10" ]
 	then
 		echo "Disabling unused filesystems(CIS 16 and 14 1.1.1.1-6)"
 		touch /etc/modprobe.d/Cypat.conf
@@ -792,11 +786,9 @@ do
 		echo "Authorized uses only. All activity may be monitored and reported." > /etc/issue.net
 		chown root:root /etc/issue.net
 		chmod 640 /etc/issue.net
-	fi
-	elif [ $task = "10" ]
+	elif [ $task = "11" ]
 	then
 		exit
-	fi
 	else
 		echo "Invalid option, choose again"
 	fi
