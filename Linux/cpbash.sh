@@ -90,8 +90,6 @@ do
 		echo "Creating file with list of system users"
 		cut -d: -f1 /etc/passwd > users.txt
 		
-		apt-get install slay
-		
 		read -p "Use ReadMe for users? (y/n) " readmeUsers
 		if [ $readmeUsers = "y" ]
 		then
@@ -133,10 +131,6 @@ do
 				if [ $userAllowed ]
 				then
 					echo "${user}:${password}" | chpasswd
-					if [ $user != "$mainUser" ]
-					then
-						slay $user
-					fi
 					
 					read -p "Is user ${user} an authorized admin? (y/n) " adminPrompt
 					if [ $adminPrompt = "y" ]
@@ -154,7 +148,6 @@ do
 				else
 					read -ap "Delete user ${user}? (y/n) " deleteUserPrompt
 					echo "Deleting user $user"
-					slay $user
 					deluser $user
 				fi
 			done
