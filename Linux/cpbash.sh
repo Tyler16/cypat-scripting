@@ -288,7 +288,8 @@ do
 		read -p "Are there any extra packages that need to be installed? (y/n) " packagePrompt
 		if [ packagePrompt="y" ]
 		then
-			read -ap "Enter all packages that need to be created with a single space seperating each group: " packages
+			echo "Enter all packages that need to be created with a single space seperating each group: "
+			read -a packages
 			for package in "${packages[@]}"
 			do
 				apt-get install $package
