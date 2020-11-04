@@ -1,7 +1,7 @@
 #!/bin/bash
 set_permissions () {
 	file=$1
-	chown root:root
+	chown root:root $file
 	chmod 0600 $file
 }
 
@@ -98,7 +98,8 @@ do
 			echo "ReadMe user system not created yet."
 		elif [ $readmeUsers = "n" ]
 		then
-			read -ap "Enter all users in readme with a single space in between each user(including admins): " users
+			echo "Enter all users in readme with a single space in between each user(including admins): "
+			read -a users
 			
 			for user in `cat users.txt`
 			do
@@ -157,7 +158,6 @@ do
 					deluser $user
 				fi
 			done
-		fi
 		else
 			echo "Invalid response, skipping user removal"
 		fi
@@ -165,7 +165,8 @@ do
 		read -p "Are there any users that need to be added? (y/n) " newUser
 		if [ $newUser = "y" ]
 		then
-			read -ap "Enter usernames of users that need to be created with a single space seperating each user: " newUsers
+			echo "Enter usernames of users that need to be created with a single space seperating each user: "
+			read -a newUsers
 			for user in "${newUsers[@]}"
 			do
 				useradd $user
@@ -183,11 +184,13 @@ do
 		read -p "Are there any new groups that need to be created? (y/n) " newGroup
 		if [ $newGroup = "y" ]
 		then
-			read -ap "Enter all groups that need to be created with a single space seperating each group: " newGroupNames
+			echo "Enter all groups that need to be created with a single space seperating each group: "
+			read -a newGroupNames
 			for group in "${newGroupNames[@]}"
 			do
 				groupadd $group
-				read -ap "Enter users that belong in ${group} with a single space seperating each user: " groupUsers
+				echo "Enter users that belong in ${group} with a single space seperating each user: "
+				read -a groupUsers
 				for user in "${groupUsers[@]}"
 				do
 					usermod -a -G $group $user
@@ -198,7 +201,8 @@ do
 		read -p "Are there any groups that need to be modified/checked? (y/n) " modifiedGroup
 		if [ $modifiedGroup = "y" ]
 		then
-			read -ap "Enter all groups that need to be modified with a single space seperating each group: " modifiedGroupNames
+			echo "Enter all groups that need to be modified with a single space seperating each group: "
+			read -a modifiedGroupNames
 			for group in "${modifiedGroupNames[@]}"
 			do
 				read -ap "Enter all users that should be in group ${group}:" allowedUsers
