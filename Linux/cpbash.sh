@@ -14,7 +14,7 @@ append_file () {
 	set_permissions $file
 }
 
-rewrite_file {
+rewrite_file () {
 	filename=$1
 	file=$2
 	chmod 777 $file
