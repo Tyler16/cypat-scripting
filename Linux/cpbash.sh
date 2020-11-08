@@ -316,15 +316,20 @@ do
 		if [ $OS = "1" ] || [ $OS = "2" ]
 		then
 			apt-get install firefox
-			rewrite_file local-settings.js /usr/lib/firefox/defaults/prefs/local-settings.js
+			touch /usr/lib/firefox/defaults/pref/local-settings.js
+			rewrite_file local-settings.js /usr/lib/firefox/defaults/pref/local-settings.js
+t			touch /usr/lib/firefox/mozilla.cfg
 			rewrite_file mozilla.cfg /usr/lib/firefox/mozilla.cfg
 		elif [ $OS = "3" ]
 		then
 			apt-get install firefox-esr
-			rewrite_file local-settings.js /usr/lib/firefox-esr/defaults/prefs/local-settings.js
+			touch /usr/lib/firefox-esr/defaults/pref/local-settings.js
+			rewrite_file local-settings.js /usr/lib/firefox-esr/defaults/pref/local-settings.js
+			touch /usr/lib/firefox/mozilla.cfg
 			rewrite_file mozilla.cfg /usr/lib/firefox-esr/mozilla.cfg
 		fi
-		firefoxFile = $(find /home/${mainUser}/.mozilla/firefox -name "*.default")
+		firefoxFile=$(find /home/${mainUser}/.mozilla/firefox -name "*.default")
+		touch ${firefoxFile}/user.js
 		rewrite_file user.js ${firefoxFile}/user.js
 		
 		echo "Not allowing unauthenticated packages"
@@ -697,32 +702,23 @@ do
 
 			for file in `cat media-files.txt`
 			do
-				read -p "Remove file ${$file} (say no if cyberpatriot file)? (y/n)" fileRemovePrompt
+				read -p "Remove file ${file} (say no if cyberpatriot file)? (y/n) " fileRemovePrompt
 				if [ fileRemovePrompt = "y" ]
 				then
-					rm -rf $file
+					rm -rf "$file"
 				fi
 			done
 		elif [ $scanType = "n" ]
 		then
-			find /home -type f -iname "*.mov" >> media-files.txt
-			find /home -type f -iname "*.mp4" >> media-files.txt
-			find /home -type f -iname "*.webm" >> media-files.txt
-			find /home -type f -iname "*.ogg" >> media-files.txt
-			find /home -type f -iname "*.mp3" >> media-files.txt
-			find /home -type f -iname "*.wav" >> media-files.txt
-			find /home -type f -iname "*.gif" >> media-files.txt
-			find /home -type f -iname "*.jpeg" >> media-files.txt
-			find /home -type f -iname "*.jpg" >> media-files.txt
-			find /home -type f -iname "*.png" >> media-files.txt
-			for file in `cat media-files.txt`
-			do
-				read -p "Remove file ${$file} (say no if cyberpatriot file)? (y/n)" fileRemovePrompt
-				if [ fileRemovePrompt = "y" ]
-				then
-					rm -rf $file
-				fi
-			done
+			find /home -name "*.mov" -type f -delete
+			find /home -name "*.mp4" -type f -delete
+			find /home -name "*.webm" -type f -delete
+			find /home -name "*.ogg" -type f -delete
+			find /home -name "*.mp3" -type f -delete
+			find /home -name "*.gif" -type f -delete
+			find /home -name "*.jpeg" -type f -delete
+			find /home -name "*.jpg" -type f -delete
+			find /home -name "*.png" -type f -delete
 		else
 			echo "Invalid response, skipping"
 		fi
