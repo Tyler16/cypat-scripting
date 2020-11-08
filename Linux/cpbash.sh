@@ -316,7 +316,7 @@ do
 		
 		echo "Removing hacking tools and vulnerable services(Includes CIS 16 1.5.4)"
 		prelink -ua
-		apt-get purge -y aircrack-ng alien apktool autofs crack crack-common crack-md5 fcrackzip hydra* irpas *inetd inetutils* john* *kismet* lcrack logkeys *macchanger* *netcat* nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* pdfcrack portmap prelink rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot vtgrab wireshark yersinia *zeitgeist*
+		apt-get purge -y aircrack-ng alien apktool autofs crack crack-common crack-md5 *ettercap* fcrackzip hydra* irpas *inetd inetutils* john* *kismet* lcrack logkeys *macchanger* *netcat* nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* pdfcrack portmap prelink rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot vtgrab wireshark yersinia *zeitgeist*
 		
 		read -p "Would you like to remove every game for the system? (y/n): " gamePrompt
 		if [ $gamePrompt = "y" ]
