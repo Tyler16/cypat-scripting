@@ -313,17 +313,19 @@ do
 		fi
 		
 		echo "Securing firefox"
-		firefoxFile = $(find /home/${mainUser}/.mozilla/firefox -name "*.default")
-		rewrite_file user.js ${firefoxFile}/user.js
 		if [ $OS = "1" ] || [ $OS = "2" ]
 		then
+			apt-get install firefox
 			rewrite_file local-settings.js /usr/lib/firefox/defaults/prefs/local-settings.js
 			rewrite_file mozilla.cfg /usr/lib/firefox/mozilla.cfg
 		elif [ $OS = "3" ]
 		then
+			apt-get install firefox-esr
 			rewrite_file local-settings.js /usr/lib/firefox-esr/defaults/prefs/local-settings.js
 			rewrite_file mozilla.cfg /usr/lib/firefox-esr/mozilla.cfg
 		fi
+		firefoxFile = $(find /home/${mainUser}/.mozilla/firefox -name "*.default")
+		rewrite_file user.js ${firefoxFile}/user.js
 		
 		echo "Not allowing unauthenticated packages"
 		append_file /etc/apt/apt.conf.d/01-vendor-ubuntu 'APT::Get::AllowUnauthenticated "false";'
