@@ -302,7 +302,7 @@ do
 	elif [ $task = "5" ]
 	then
 		read -p "Are there any extra packages that need to be installed? (y/n) " packagePrompt
-		if [ packagePrompt="y" ]
+		if [ packagePrompt = "y" ]
 		then
 			echo "Enter all packages that need to be created with a single space seperating each group: "
 			read -a packages
