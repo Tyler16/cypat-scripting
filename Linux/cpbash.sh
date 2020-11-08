@@ -70,20 +70,25 @@ do
 		then
 			rewrite_file ubuntu16Sources.list /etc/apt/sources.list
 			chmod 0640 /etc/apt/sources.list
+			rewrite_file 10periodic /etc/apt/apt.conf.d/10periodic
+			chmod 0640 /etc/apt/apt.conf.d/10periodic
+			rewrite_file ubuntu20auto-upgrades /etc/apt/apt.conf.d/20auto-upgrades
+			chmod 0640 /etc/apt/apt.conf.d/20auto-upgrades
 		elif [ $OS = "2" ]
 		then
 			rewrite_file ubuntu18Sources.list /etc/apt/sources.list
 			chmod 0640 /etc/apt/sources.list
+			rewrite_file 10periodic /etc/apt/apt.conf.d/10periodic
+			chmod 0640 /etc/apt/apt.conf.d/10periodic
+			rewrite_file ubuntu20auto-upgrades /etc/apt/apt.conf.d/20auto-upgrades
+			chmod 0640 /etc/apt/apt.conf.d/20auto-upgrades
 		elif [ $OS = "3" ]
 		then
-			rewrite_file DebianSources.list /etc/apt/sources.list
+			rewrite_file debianSources.list /etc/apt/sources.list
 			chmod 0640 /etc/apt/sources.list
+			rewrite_file debian20auto-upgrades /etc/apt/apt.conf.d/20auto-upgrades
+			chmod 0640 /etc/apt/apt.conf.d/20auto-upgrades
 		fi
-		
-		rewrite_file 10periodic /etc/apt/apt.conf.d/10periodic
-		chmod 0640 /etc/apt/apt.conf.d/10periodic
-		rewrite_file 20auto-upgrades /etc/apt/apt.conf.d/20auto-upgrades
-		chmod 0640 /etc/apt/apt.conf.d/20auto-upgrades
 		
 		apt-get update
 		read -p "Do updates now(only if rest of script is ran)? (y/n) " updatePrompt
@@ -305,6 +310,19 @@ do
 			do
 				apt-get install $package
 			done
+		fi
+		
+		echo "Securing firefox"
+		firefoxFile = $(find /home/${mainUser}/.mozilla/firefox -name "*.default")
+		rewrite_file user.js ${firefoxFile}/user.js
+		if [ $OS = "1" ] || [ $OS = "2" ]
+		then
+			rewrite_file local-settings.js /usr/lib/firefox/defaults/prefs/local-settings.js
+			rewrite_file mozilla.cfg /usr/lib/firefox/mozilla.cfg
+		elif [ $OS = "3" ]
+		then
+			rewrite_file local-settings.js /usr/lib/firefox-esr/defaults/prefs/local-settings.js
+			rewrite_file mozilla.cfg /usr/lib/firefox-esr/mozilla.cfg
 		fi
 		
 		echo "Not allowing unauthenticated packages"
