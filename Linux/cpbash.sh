@@ -70,9 +70,13 @@ do
 		then
 			rewrite_file ubuntu16Sources.list /etc/apt/sources.list
 			chmod 0640 /etc/apt/sources.list
-		elif [ $OS = "2"]
+		elif [ $OS = "2" ]
 		then
 			rewrite_file ubuntu18Sources.list /etc/apt/sources.list
+			chmod 0640 /etc/apt/sources.list
+		elif [ $OS = "3" ]
+		then
+			rewrite_file DebianSources.list /etc/apt/sources.list
 			chmod 0640 /etc/apt/sources.list
 		fi
 		
