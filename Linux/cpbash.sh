@@ -699,15 +699,6 @@ t			touch /usr/lib/firefox/mozilla.cfg
 			find / -type f -iname "*.tif" >> media-files.txt
 			find / -type f -iname "*.tiff" >> media-files.txt
 			find / -type f -iname "*.webp" >> media-files.txt
-
-			for file in `cat media-files.txt`
-			do
-				read -p "Remove file ${file} (say no if cyberpatriot file)? (y/n) " fileRemovePrompt
-				if [ fileRemovePrompt = "y" ]
-				then
-					rm -rf "$file"
-				fi
-			done
 		elif [ $scanType = "n" ]
 		then
 			find /home -name "*.mov" -type f -delete
