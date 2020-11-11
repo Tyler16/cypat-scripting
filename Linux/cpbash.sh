@@ -112,6 +112,8 @@ do
 			echo "Enter all users in readme with a single space in between each user(including admins): "
 			read -a users
 			
+			apt-get install slay -y
+			
 			for user in `cat users.txt`
 			do
 				initialIDDifference=0
@@ -133,22 +135,28 @@ do
 				then
 					if [ $user = $mainUser ] || [[ " ${users[@]} " =~ " ${user} " ]]
 					then
-						echo "${user}:${password}" | chpasswd
-			
-						read -p "Is user ${user} an authorized admin? (y/n) " adminPrompt
-						if [ $adminPrompt = "y" ]
+						if [ $user != $mainUser ]
 						then
-							gpasswd -a $user sudo
-							gpasswd -a $user adm
-							gpasswd -a $user lpadmin
-							gpasswd -a $user sambashare
-						else
-							gpasswd -d $user sudo
-							gpasswd -d $user adm
-							gpasswd -d $user lpadmin
-							gpasswd -d $user sambashare
+							echo "${user}:${password}" | chpasswd
+							
+							read -p "Is user ${user} an authorized admin? (y/n) " adminPrompt
+							if [ $adminPrompt = "y" ]
+							then
+								gpasswd -a $user sudo
+								gpasswd -a $user adm
+								gpasswd -a $user lpadmin
+								gpasswd -a $user sambashare
+							else
+								gpasswd -d $user sudo
+								gpasswd -d $user adm
+								gpasswd -d $user lpadmin
+								gpasswd -d $user sambashare
+							fi
+							
+							slay $user
 						fi
 					else
+						slay $user
 						read -p "Delete user ${user}? (y/n) " deleteUserPrompt
 						if [ $deleteUserPrompt = "y" ]
 						then
@@ -346,10 +354,10 @@ t			touch /usr/lib/firefox/mozilla.cfg
 		if [ $OS = "1" ] || [ $OS = "2" ]
 		then
 			prelink -ua
-			apt-get purge -y aircrack-ng alien apktool autofs crack crack-common crack-md5 *ettercap* fcrackzip hydra* irpas *inetd inetutils* john* *kismet* lcrack logkeys *macchanger* *netcat* nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* pdfcrack portmap prelink rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot vtgrab wireshark yersinia *zeitgeist*
+			apt-get purge -y aircrack-ng alien apktool autofs crack crack-common crack-md5 *ettercap* fcrackzip hydra* irpas *inetd inetutils* john* *kismet* lcrack logkeys *macchanger* *netcat* nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* pdfcrack portmap rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot vtgrab wireshark yersinia *zeitgeist*
 		elif [ $OS = "3" ]
 		then
-			apt-get purge -y aircrack-ng alien apktool autofs crack crack-common crack-md5 *ettercap* fcrackzip hydra* *inetd inetutils* hashcat* john* *kismet* lcrack *macchanger* *netcat* nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* pdfcrack portmap prelink rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot wireshark yersinia *zeitgeist*
+			apt-get purge -y aircrack-ng alien apktool autofs crack crack-common crack-md5 *ettercap* fcrackzip hydra* *inetd inetutils* hashcat* john* *kismet* lcrack *macchanger* *netcat* nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* pdfcrack portmap rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot wireshark yersinia *zeitgeist*
 		fi
 		
 		read -p "Would you like to remove every game for the system? (y/n): " gamePrompt
@@ -432,6 +440,8 @@ t			touch /usr/lib/firefox/mozilla.cfg
 			apt-get install ssh
 			apt-get install openssh
 			apt-get install openssh-server
+			systemctl enable sshd.service
+			systemctl start sshd.service
 			ufw allow ssh
 			rewrite_file sshd_config /etc/ssh/sshd_config
 			chmod +w /etc/ssh/sshd_config
@@ -801,6 +811,9 @@ t			touch /usr/lib/firefox/mozilla.cfg
 		rewrite_file limits.conf /etc/security/limits.conf
 		sysctl -w fs.suid_dumpable=0
 		sysctl -w kernel.randomize_va_space=2
+		
+		prelink -ua
+		apt-get purge prelink
 		
 		echo "Configuring AppArmor (CIS 16 1.6(not using selinux))"
 		apt-get install apparmor apparmor-profiles libpam-apparmor
