@@ -338,6 +338,9 @@ t			touch /usr/lib/firefox/mozilla.cfg
 		echo "Disabling ctrl+alt+delete key sequence"
 		systemctl mask ctrl-alt-del.target
 		systemctl daemon-reload
+		touch /etc/dconf/db/local.d/00-disable-CAD
+		rewrite_file 00-disable-CAD /etc/dconf/db/local.d/00-disable-CAD
+		dconf update
 		
 		echo "Removing hacking tools and vulnerable services(Includes CIS 16 1.5.4)"
 		if [ $OS = "1" ] || [ $OS = "2" ]
@@ -789,8 +792,8 @@ t			touch /usr/lib/firefox/mozilla.cfg
 		rewrite_file 00_header /etc/grub.d/00_header
 		chmod +w /etc/grub.d/00_header
 		echo 'cat <<EOF' >> /etc/grub.d/00_header
-		echo 'set superusers="${mainUser}"' >> /etc/grub.d/00_header
-		echo 'password pbkdf2 ${mainUser} ${grubPassword}' >> /etc/grub.d/00_header
+		echo 'set superusers="root"' >> /etc/grub.d/00_header
+		echo 'password pbkdf2 root ${grubPassword}' >> /etc/grub.d/00_header
 		echo 'EOF' >> /etc/grub.d/00_header
 		chmod 600 /boot/grub.d/00_header
 		
