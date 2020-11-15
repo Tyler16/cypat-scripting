@@ -216,6 +216,10 @@ do
 			do
 				"Enter all users that should be in group ${group}:"
 				read -a allowedUsers
+				for user in "${allowedUsers}"
+				do
+					usermod -a -G $group $user
+				done
 			done
 		fi
 		
@@ -238,6 +242,10 @@ do
 		rewrite_file common-password /etc/pam.d/common-password
 		rewrite_file login.defs /etc/login.defs
 		rewrite_file common-auth /etc/pam.d/common-auth
+		
+		echo "Setting umask"
+		append_file /etc/bash.bashrc "umask 027"
+		append_file /etc/profile "umask 027"
 		
 		for file in /etc/sudoers.d/*
 		do
