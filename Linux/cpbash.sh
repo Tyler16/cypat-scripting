@@ -359,10 +359,10 @@ t			touch /usr/lib/firefox/mozilla.cfg
 		if [ $OS = "1" ] || [ $OS = "2" ]
 		then
 			prelink -ua
-			apt-get purge -y aircrack-ng alien apktool autofs crack crack-common crack-md5 *ettercap* fcrackzip hydra* irpas *inetd inetutils* john* *kismet* lcrack logkeys *macchanger* *netcat* nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* pdfcrack portmap rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot vtgrab wireshark yersinia *zeitgeist*
+			apt-get purge -y acccheck aircrack-ng alien apktool argon2 autofs bruteforce* calife cewl chiark-really cmospwd crack crack-common crack-md5 cupp cupp3 *ettercap* fcrackzip hydra* hashcat* irpas *inetd inetutils* john* *kismet* lcrack logkeys libargon2-0* *macchanger* maskprocessor medusa ncrack *netcat* nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* patator pcredz pdfcrack portmap princeprocessor rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot vtgrab wfuzz wireshark yersinia *zeitgeist*
 		elif [ $OS = "3" ]
 		then
-			apt-get purge -y aircrack-ng alien apktool autofs crack crack-common crack-md5 *ettercap* fcrackzip hydra* *inetd inetutils* hashcat* john* *kismet* lcrack *macchanger* *netcat* nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* pdfcrack portmap rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot wireshark yersinia *zeitgeist*
+			apt-get purge -y acccheck aircrack-ng alien apktool argon2 autofs bruteforce* calife cewl chiark-really cmospwd crack crack-common crack-md5 cupp cupp3 *ettercap* fcrackzip hydra* hashcat* *inetd inetutils* john* *kismet* lcrack libargon2-0* *macchanger* maskprocessor medusa ncrack *netcat* nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* patator pdfcrack portmap princeprocessor rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot wfuzz wireshark yersinia *zeitgeist*
 		fi
 		
 		read -p "Would you like to remove every game for the system? (y/n): " gamePrompt
@@ -592,6 +592,13 @@ t			touch /usr/lib/firefox/mozilla.cfg
 		elif [ $mailPrompt = "n" ]
 		then
 			apt-get purge *dovecot*
+			apt-get purge chasquid
+			apt-get purge *cyrus*
+			apt-get purge gyrus
+			apt-get purge citadel-server citadel-suite
+			apt-get purge courier*
+			apt-get purge opensmtpd*
+			apt-get purge sqwebmail
 			ufw deny smtp
 			ufw deny pop2
 			ufw deny pop3
