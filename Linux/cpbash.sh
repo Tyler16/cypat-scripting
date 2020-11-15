@@ -62,7 +62,8 @@ do
 	echo "8. Prohibited files"
 	echo "9. Virus, Rootkits and unwanted Scripts"
 	echo "10. Booting and File Mounting"
-	echo "11. End Script"
+	echo "11. File Permissions"
+	echo "12. End Script"
 	read -p "> " task
 	if [ $task = "1" ]
 	then
@@ -238,14 +239,6 @@ do
 		rewrite_file login.defs /etc/login.defs
 		rewrite_file common-auth /etc/pam.d/common-auth
 		
-		echo "Setting permissions on user info files and bash history files"
-		chown root:root .bash_history
-		chmod 0640 .bash_history
-		chmod 0600 /etc/shadow
-		chmod 0600 /etc/gshadow
-		chmod 0600 /etc/passwd
-		chmod 0600 /etc/group
-		
 		for file in /etc/sudoers.d/*
 		do
 			read -p "Remove file ${file} (Only remove if not cyberpatriot or main file)? (y/n) " sudoersPrompt
@@ -258,9 +251,21 @@ do
 	elif [ $task = "4" ]
 	then
 		echo "Setting up firewall"
-		apt-get install ufw
-		apt-get install iptables
+		apt-get install ufw -y
+		apt-get install iptables -y
 		ufw enable
+  		iptables -P INPUT DROP
+ 		iptables -P OUTPUT DROP
+		iptables -P FORWARD DROP
+		iptables -A INPUT -i lo -j ACCEPT
+		iptables -A OUTPUT -o lo -j ACCEPT
+		iptables -A INPUT -s 127.0.0.0/8 -j DROP
+		iptables -A OUTPUT -p tcp -m state --state NEW,ESTABLISHED -j ACCEPT
+		iptables -A OUTPUT -p udp -m state --state NEW,ESTABLISHED -j ACCEPT
+		iptables -A OUTPUT -p icmp -m state --state NEW,ESTABLISHED -j ACCEPT
+		iptables -A INPUT -p tcp -m state --state ESTABLISHED -j ACCEPT
+		iptables -A INPUT -p udp -m state --state ESTABLISHED -j ACCEPT
+		iptables -A INPUT -p icmp -m state --state ESTABLISHED -j ACCEPT
 		
 		echo "Setting hosts file to default"
 		rewrite_file hosts /etc/hosts
@@ -737,11 +742,7 @@ t			touch /usr/lib/firefox/mozilla.cfg
 		echo "Finding and listing any files with password info."
 		grep -rnwl '/' -e '$password' > passwordFiles.txt
 	elif [ $task = "9" ]
-	then
-		echo "Getting rid of shosts files"
-		find / -name "*.shosts" -type f -delete
-		find / -name "shosts.equiv" -type f -delete
-		
+	then	
 		echo "Stopping startup scripts"
 		echo > /etc/rc.local
 		echo "exit 0" >> /etc/rc.local
@@ -825,14 +826,100 @@ t			touch /usr/lib/firefox/mozilla.cfg
 		touch /etc/motd
 		echo "Hello and welcome to fortnite central" >> /etc/motd
 		chown root:root /etc/motd
-		chmod 640 /etc/motd
+		chmod 0640 /etc/motd
 		echo "Authorized uses only. All activity may be monitored and reported." > /etc/issue
 		chown root:root /etc/issue
-		chmod 640 /etc/issue
+		chmod 0640 /etc/issue
 		echo "Authorized uses only. All activity may be monitored and reported." > /etc/issue.net
 		chown root:root /etc/issue.net
-		chmod 640 /etc/issue.net
+		chmod 0640 /etc/issue.net
 	elif [ $task = "11" ]
+	then
+		echo "Setting permissions on user info files and bash history files"
+		chown root:root .bash_history
+		chmod 0640 .bash_history
+		chown root:shadow /etc/shadow
+		chmod 0600 /etc/shadow
+		chown root:shadow /etc/gshadow
+		chmod 0600 /etc/gshadow
+		chown root:root /etc/passwd
+		chmod 0600 /etc/passwd
+		chown root:root /etc/passwd
+		chmod 0600 /etc/group
+		chown root:shadow /etc/shadow-
+		chmod 0600 /etc/shadow-
+		chown root:shadow /etc/gshadow-
+		chmod 0600 /etc/gshadow-
+		chown root:root /etc/passwd-
+		chmod 0600 /etc/passwd-
+		chown root:root /etc/group-
+		chmod 0600 /etc/group-
+		echo "Getting a list of all files with possibly insecure permissions"
+		find / -perm 007 > perms.txt
+		find / -perm 017 > perms.txt
+		find / -perm 027 > perms.txt
+		find / -perm 037 > perms.txt
+		find / -perm 047 > perms.txt
+		find / -perm 057 > perms.txt
+		find / -perm 067 > perms.txt
+		find / -perm 077 > perms.txt
+		find / -perm 107 > perms.txt
+		find / -perm 117 > perms.txt
+		find / -perm 127 > perms.txt
+		find / -perm 137 > perms.txt
+		find / -perm 147 > perms.txt
+		find / -perm 157 > perms.txt
+		find / -perm 167 > perms.txt
+		find / -perm 177 > perms.txt
+		find / -perm 207 > perms.txt
+		find / -perm 217 > perms.txt
+		find / -perm 227 > perms.txt
+		find / -perm 237 > perms.txt
+		find / -perm 247 > perms.txt
+		find / -perm 257 > perms.txt
+		find / -perm 367 > perms.txt
+		find / -perm 377 > perms.txt
+		find / -perm 307 > perms.txt
+		find / -perm 317 > perms.txt
+		find / -perm 327 > perms.txt
+		find / -perm 337 > perms.txt
+		find / -perm 347 > perms.txt
+		find / -perm 357 > perms.txt
+		find / -perm 367 > perms.txt
+		find / -perm 377 > perms.txt
+		find / -perm 407 > perms.txt
+		find / -perm 417 > perms.txt
+		find / -perm 427 > perms.txt
+		find / -perm 437 > perms.txt
+		find / -perm 447 > perms.txt
+		find / -perm 457 > perms.txt
+		find / -perm 467 > perms.txt
+		find / -perm 477 > perms.txt
+		find / -perm 507 > perms.txt
+		find / -perm 517 > perms.txt
+		find / -perm 527 > perms.txt
+		find / -perm 537 > perms.txt
+		find / -perm 547 > perms.txt
+		find / -perm 557 > perms.txt
+		find / -perm 567 > perms.txt
+		find / -perm 577 > perms.txt
+		find / -perm 607 > perms.txt
+		find / -perm 617 > perms.txt
+		find / -perm 627 > perms.txt
+		find / -perm 637 > perms.txt
+		find / -perm 647 > perms.txt
+		find / -perm 657 > perms.txt
+		find / -perm 667 > perms.txt
+		find / -perm 677 > perms.txt
+		find / -perm 707 > perms.txt
+		find / -perm 717 > perms.txt
+		find / -perm 727 > perms.txt
+		find / -perm 737 > perms.txt
+		find / -perm 747 > perms.txt
+		find / -perm 757 > perms.txt
+		find / -perm 767 > perms.txt
+		find / -perm 777 > perms.txt
+	elif [ $task = "12" ]
 	then
 		exit
 	else
