@@ -25,7 +25,7 @@ rewrite_file () {
 
 unalias -a
 append_file ~/.bashrc "unalias -a"
-append_file ~/.bashrc "unalias -a"
+append_file /root/.bashrc "unalias -a"
 
 clear
 echo "Aliases have been removed"
@@ -729,12 +729,13 @@ t			touch /usr/lib/firefox/mozilla.cfg
 			find /home -name "*.ogg" -type f -delete
 			find /home -name "*.mp3" -type f -delete
 			find /home -name "*.gif" -type f -delete
-			find /home -name "*.jpeg" -type f -delete
-			find /home -name "*.jpg" -type f -delete
-			find /home -name "*.png" -type f -delete
 		else
 			echo "Invalid response, skipping"
 		fi
+		
+		read -p "Enter the password of any admin(from the readme): " password
+		echo "Finding and listing any files with password info."
+		grep -rnwl '/' -e '$password'
 	elif [ $task = "9" ]
 	then
 		echo "Getting rid of shosts files"
