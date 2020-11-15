@@ -735,7 +735,7 @@ t			touch /usr/lib/firefox/mozilla.cfg
 		
 		read -p "Enter the password of any admin(from the readme): " password
 		echo "Finding and listing any files with password info."
-		grep -rnwl '/' -e '$password'
+		grep -rnwl '/' -e '$password' > passwordFiles.txt
 	elif [ $task = "9" ]
 	then
 		echo "Getting rid of shosts files"
