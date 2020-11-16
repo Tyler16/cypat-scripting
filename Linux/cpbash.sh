@@ -368,14 +368,14 @@ t			touch /usr/lib/firefox/mozilla.cfg
 		if [ $OS = "1" ]
 		then
 			prelink -ua
-			apt-get purge -y acccheck aircrack-ng alien apktool argon2 autofs bruteforce* calife cewl chiark-really cmospwd crack crack-common crack-md5 cupp cupp3 *ettercap* fcrackzip hydra* hashcat* irpas *inetd inetutils* john* *kismet* lcrack logkeys libargon2-0* *macchanger* maskprocessor medusa ncrack *netcat* nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* patator pcredz pdfcrack portmap princeprocessor rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot vtgrab wfuzz wireshark yersinia *zeitgeist*
+			apt-get purge -y acccheck aircrack-ng alien apktool argon2 autofs bruteforce* calife cewl chiark-really cmospwd crack crack-common crack-md5 cupp cupp3 *ettercap* fcrackzip gameconqueror hydra* hashcat* irpas *inetd inetutils* john* *kismet* lcrack logkeys libargon2-0* *macchanger* maskprocessor medusa ncrack *netcat* nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* patator pcredz pdfcrack portmap princeprocessor rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot vtgrab wfuzz wireshark yersinia *zeitgeist*
 		elif [ $OS = "2" ]
 		then
 			prelink -ua
-			apt-get purge -y acccheck aircrack-ng alien apktool argon2 autofs bruteforce* calife cewl chiark-really cmospwd crack crack-common crack-md5 cupp cupp3 *ettercap* fcrackzip hydra* hashcat* irpas *inetd inetutils* john* *kismet* lcrack libargon2-0* *macchanger* maskprocessor medusa ncrack *netcat* nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* patator pcredz pdfcrack portmap princeprocessor rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot vtgrab wfuzz wireshark yersinia *zeitgeist*
+			apt-get purge -y acccheck aircrack-ng alien apktool argon2 autofs bruteforce* calife cewl chiark-really cmospwd crack crack-common crack-md5 cupp cupp3 *ettercap* fcrackzip gameconqueror hydra* hashcat* irpas *inetd inetutils* john* *kismet* lcrack libargon2-0* *macchanger* maskprocessor medusa ncrack *netcat* nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* patator pcredz pdfcrack portmap princeprocessor rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot vtgrab wfuzz wireshark yersinia *zeitgeist*
 		elif [ $OS = "3" ]
 		then
-			apt-get purge -y acccheck aircrack-ng alien apktool argon2 autofs bruteforce* calife cewl chiark-really cmospwd crack crack-common crack-md5 cupp cupp3 *ettercap* fcrackzip hydra* hashcat* *inetd inetutils* john* *kismet* lcrack libargon2-0* *macchanger* maskprocessor medusa ncrack *netcat* nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* patator pdfcrack portmap princeprocessor rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot wfuzz wireshark yersinia *zeitgeist*
+			apt-get purge -y acccheck aircrack-ng alien apktool argon2 autofs bruteforce* calife cewl chiark-really cmospwd crack crack-common crack-md5 cupp cupp3 *ettercap* fcrackzip gameconqueror hydra* hashcat* *inetd inetutils* john* *kismet* lcrack libargon2-0* *macchanger* maskprocessor medusa ncrack *netcat* nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* patator pdfcrack portmap princeprocessor rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot wfuzz wireshark yersinia *zeitgeist*
 		fi
 		
 		read -p "Would you like to remove every game for the system? (y/n): " gamePrompt
