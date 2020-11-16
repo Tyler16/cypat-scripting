@@ -110,7 +110,9 @@ do
 			echo "ReadMe user system not created yet."
 		elif [ $readmeUsers = "n" ]
 		then
-			echo "Enter all users in readme with a single space in between each user(including admins): "
+			echo "Enter all admins in readme with a single space between each user: "
+			read -a admins
+			echo "Enter all users in readme with a single space in between each user: "
 			read -a users
 			
 			apt-get install slay -y
@@ -134,14 +136,13 @@ do
 				
 				if [ $userID -ge 1000 ]
 				then
-					if [ $user = $mainUser ] || [[ " ${users[@]} " =~ " ${user} " ]]
+					if [ $user = $mainUser ] || [[ " ${users[@]} " =~ " ${user} " ]] || [[ " ${admins[@]} " =~ " ${user} " ]]
 					then
 						if [ $user != $mainUser ]
 						then
 							echo "${user}:${password}" | chpasswd
 							
-							read -p "Is user ${user} an authorized admin? (y/n) " adminPrompt
-							if [ $adminPrompt = "y" ]
+							if [[ " ${admins[@]} " =~ " ${user} " ]]
 							then
 								gpasswd -a $user sudo
 								gpasswd -a $user adm
@@ -364,10 +365,14 @@ t			touch /usr/lib/firefox/mozilla.cfg
 		dconf update
 		
 		echo "Removing hacking tools and vulnerable services(Includes CIS 16 1.5.4)"
-		if [ $OS = "1" ] || [ $OS = "2" ]
+		if [ $OS = "1" ]
 		then
 			prelink -ua
 			apt-get purge -y acccheck aircrack-ng alien apktool argon2 autofs bruteforce* calife cewl chiark-really cmospwd crack crack-common crack-md5 cupp cupp3 *ettercap* fcrackzip hydra* hashcat* irpas *inetd inetutils* john* *kismet* lcrack logkeys libargon2-0* *macchanger* maskprocessor medusa ncrack *netcat* nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* patator pcredz pdfcrack portmap princeprocessor rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot vtgrab wfuzz wireshark yersinia *zeitgeist*
+		elif [ $OS = "2" ]
+		then
+			prelink -ua
+			apt-get purge -y acccheck aircrack-ng alien apktool argon2 autofs bruteforce* calife cewl chiark-really cmospwd crack crack-common crack-md5 cupp cupp3 *ettercap* fcrackzip hydra* hashcat* irpas *inetd inetutils* john* *kismet* lcrack libargon2-0* *macchanger* maskprocessor medusa ncrack *netcat* nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* patator pcredz pdfcrack portmap princeprocessor rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot vtgrab wfuzz wireshark yersinia *zeitgeist*
 		elif [ $OS = "3" ]
 		then
 			apt-get purge -y acccheck aircrack-ng alien apktool argon2 autofs bruteforce* calife cewl chiark-really cmospwd crack crack-common crack-md5 cupp cupp3 *ettercap* fcrackzip hydra* hashcat* *inetd inetutils* john* *kismet* lcrack libargon2-0* *macchanger* maskprocessor medusa ncrack *netcat* nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* patator pdfcrack portmap princeprocessor rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot wfuzz wireshark yersinia *zeitgeist*
