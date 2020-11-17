@@ -22,7 +22,6 @@ choco install notepadplusplus
 choco upgrade notepadplusplus
 choco install firefox
 choco upgrade firefox
-choco install ie11
 choco upgrade ie11
 choco upgrade putty
 choco upgrade thunderbird
