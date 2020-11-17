@@ -28,4 +28,19 @@ do {
 until ($inputs -eq 'end')
 
 foreach ($user in $users) {
+	if ($authorizedUsers.Contains($user)) {
+		Set-LocalUser -Name $user -Password $password -PasswordNeverExpires $false -UserMayChangePassword $true
+	}
+	else {
+		Remove-LocalUser -Name $user
+	}
+}
+
+foreach ($admin in $admins) {
+	if ($authorizedAdmins.Contains($admin)) {
+		Set-LocalUser -Name $admin -Password $password -PasswordNeverExpires $false -UserMayChangePassword $true
+	}
+	else {
+		Remove-LocalGroupMember -Group "Administrators" -Member $admin
+	}
 }
