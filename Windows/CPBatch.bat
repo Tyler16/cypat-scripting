@@ -51,3 +51,8 @@ auditpol /set /category:* /failure:enable
 
 ECHO "Enabling UAC"
 reg ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v EnableLUA /t REG_DWORD /d 1 /f
+
+ECHO "Disabling Guest Account"
+net user guest /active:no
+
+reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update" /v AUOptions /t REG_DWORD /d 3 /f
