@@ -166,6 +166,25 @@ do
 							deluser --force --remove-all-files $user
 						fi
 					fi
+				else
+					read -p "Delete user ${user}? (has UID below 1000, y/n) " deleteUserLowUIDPrompt
+					if [ $deleteUserLowUIDPrompt = "y" ]
+					then
+						echo "Deleting user $user"
+						deluser --force --remove-all-files $user
+					elif [ $deleteUserPrompt = "n" ]
+					then
+						read -p "Change UID to be greater than 1000 (y/n)" changeUIDPrompt
+						if [ $changeUIDPrompt = "y" ]
+						then
+							echo "Chagning UID for $user"
+							let newID=2000 + $initialIDDifference
+							usermod -u $newID $user
+							userID=$newID
+							((initialIDDifference++))
+						fi
+					else
+					fi
 				fi
 			done
 		else
@@ -239,7 +258,7 @@ do
 		rewrite_file su /etc/pam.d/su
 		
 		echo "Setting Password Policies"
-		apt-get install libpam-cracklib
+		apt-get install libpam-cracklib -y
 		rewrite_file common-password /etc/pam.d/common-password
 		rewrite_file login.defs /etc/login.defs
 		rewrite_file common-auth /etc/pam.d/common-auth
@@ -251,7 +270,7 @@ do
 		for file in /etc/sudoers.d/*
 		do
 			read -p "Remove file ${file} (Only remove if not cyberpatriot or main file)? (y/n) " sudoersPrompt
-			if [ $sudoersPrompt = "y"]
+			if [ $sudoersPrompt = "y" ]
 			then
 				rm $file
 			fi
@@ -330,21 +349,21 @@ do
 			read -a packages
 			for package in "${packages[@]}"
 			do
-				apt-get install $package
+				apt-get install $package -y
 			done
 		fi
 		
 		echo "Securing firefox"
 		if [ $OS = "1" ] || [ $OS = "2" ]
 		then
-			apt-get install firefox
+			apt-get install firefox -y
 			touch /usr/lib/firefox/defaults/pref/local-settings.js
 			rewrite_file local-settings.js /usr/lib/firefox/defaults/pref/local-settings.js
 t			touch /usr/lib/firefox/mozilla.cfg
 			rewrite_file mozilla.cfg /usr/lib/firefox/mozilla.cfg
 		elif [ $OS = "3" ]
 		then
-			apt-get install firefox-esr
+			apt-get install firefox-esr -y
 			touch /usr/lib/firefox-esr/defaults/pref/local-settings.js
 			rewrite_file local-settings.js /usr/lib/firefox-esr/defaults/pref/local-settings.js
 			touch /usr/lib/firefox-esr/mozilla.cfg
@@ -368,14 +387,14 @@ t			touch /usr/lib/firefox/mozilla.cfg
 		if [ $OS = "1" ]
 		then
 			prelink -ua
-			apt-get purge -y acccheck aircrack-ng alien apktool argon2 autofs bruteforce* calife cewl chiark-really cmospwd crack crack-common crack-md5 cupp cupp3 *ettercap* fcrackzip gameconqueror hydra* hashcat* irpas *inetd inetutils* john* *kismet* lcrack logkeys libargon2-0* *macchanger* maskprocessor medusa ncrack *netcat* nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* patator pcredz pdfcrack portmap princeprocessor rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot vtgrab wfuzz wireshark yersinia *zeitgeist*
+			apt-get purge -y aircrack-ng alien apktool autofs bruteforce* calife cewl cifer chiark-really cmospwd crack crack-common crack-md5 darkstat distributed-net *ettercap* fcrackzip gameconqueror hashcat* haskell-cracknum-utils hunt hydra* irpas *inetd inetutils* john* *kismet* labrea lcrack libghc-cracknum* libwiretap* logkeys *macchanger* medusa nast netsniff-ng *netcat* nfs-common nfs-kernel-server nis *nmap* ophcrack* pcredz pdfcrack portmap rarcrack rsh-server rpcbind sipcrack sniffit snmp snort* socat socket sucrack tftpd-hpa tshark vnc4server vncsnapshot vtgrab wireshark weplab yersinia *zeitgeist* -y
 		elif [ $OS = "2" ]
 		then
 			prelink -ua
-			apt-get purge -y acccheck aircrack-ng alien apktool argon2 autofs bruteforce* calife cewl chiark-really cmospwd crack crack-common crack-md5 cupp cupp3 *ettercap* fcrackzip gameconqueror hydra* hashcat* irpas *inetd inetutils* john* *kismet* lcrack libargon2-0* *macchanger* maskprocessor medusa ncrack *netcat* nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* patator pcredz pdfcrack portmap princeprocessor rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot vtgrab wfuzz wireshark yersinia *zeitgeist*
+			apt-get purge -y acccheck aircrack-ng alien apktool argon2 autofs bruteforce* calife cewl chiark-really cmospwd crack crack-common crack-md5 cupp cupp3 *ettercap* fcrackzip gameconqueror hydra* hashcat* irpas *inetd inetutils* john* *kismet* lcrack libargon2-0* *macchanger* maskprocessor medusa ncrack *netcat* nfs-common nfs-kernel-server nis *nmap* ophcrack* patator pcredz pdfcrack portmap princeprocessor rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot vtgrab wfuzz wireshark yersinia *zeitgeist* -y
 		elif [ $OS = "3" ]
 		then
-			apt-get purge -y acccheck aircrack-ng alien apktool argon2 autofs bruteforce* calife cewl chiark-really cmospwd crack crack-common crack-md5 cupp cupp3 *ettercap* fcrackzip gameconqueror hydra* hashcat* *inetd inetutils* john* *kismet* lcrack libargon2-0* *macchanger* maskprocessor medusa ncrack *netcat* nfs-common nfs-kernel-server nginx nis *nmap* ophcrack* patator pdfcrack portmap princeprocessor rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot wfuzz wireshark yersinia *zeitgeist*
+			apt-get purge -y acccheck aircrack-ng alien apktool argon2 autofs bruteforce* calife cewl chiark-really cmospwd crack crack-common crack-md5 cupp cupp3 *ettercap* fcrackzip gameconqueror hydra* hashcat* *inetd inetutils* john* *kismet* lcrack libargon2-0* *macchanger* maskprocessor medusa ncrack *netcat* nfs-common nfs-kernel-server nis *nmap* ophcrack* patator pdfcrack portmap princeprocessor rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot wfuzz wireshark yersinia *zeitgeist* -y
 		fi
 		
 		read -p "Would you like to remove every game for the system? (y/n): " gamePrompt
@@ -384,18 +403,18 @@ t			touch /usr/lib/firefox/mozilla.cfg
 			echo "Removing games"
 			if [ $OS = "1" ]
 			then
-				apt-get purge -y 0ad* 2048-qt 7kaa* a7xpg* abe* aajm acm ace-of-penguins adanaxisgpl* adonthell* airstrike* aisleriot alex4* alien-arena* alienblaster* amoebax* amphetamine* an anagramarama* angband* angrydd animals antigravitaattori ardentryst armagetronad* asc asc-data asc-music astromenace* asylum* atanks* atom4 atomic* attal* auralquiz balder2d* ballerburg ballz* bambam barrage bastet bb bear-factory beneath-a-steel-sky berusky* between billard* biloba* biniax2* black-box blobandconquer* blobby* bloboats blobwars* blockattack blockout2 blocks-of-the-undead* bombardier bomber bomberclone* boswars* bouncy bovo brainparty* briquolo* bsdgames* btanks* bubbros bugsquish bumprace* burgerspace bve* openbve* bygfoot* bzflag* cappuccino cardstories castle-combat cavezofphear ceferino* cgoban *chess* childsplay* chipw chocolate* chromium-bsu* circuslinux* colobot* colorcode connectagram* cookietool *cowsay* crack-attack crafty* crawl* crimson criticalmass* crossfire* csmash* cube2* cultivation curseofwar cutemaze cuyo* cyphesis-cpp* cytadela* *x-rebirth dangen darkplaces* dds deal dealer defendguin* desmume deutex dhewm3* dizzy dodgindiamond2 dolphin-emu* doom-wad-shareware doomsday* dopewars* dossizola* drascula* dvorak7min eboard* edgar* efp einstein ember-media empire* endless-sky* enemylines* enigma* epiphany* etoys etw* excellent-bifurcation extremetuxracer* exult* fairymax fb-music-high ffrenzy fgo fgrun fheroes2-pkg filler fillets-ng* filters five-or-more fizmo* flare* flight-of-the-amazon-queen flightgear* flobopuyo fltk1.1-games fltk1.3-games fofix foobillard* fortune* four-in-a-row freealchemist freecell-solver-bin freeciv* freecol freedink* freedm freedoom freedroid* freegish freeorion* freespace2* freesweep freetennis* freevial fretsonfire* frobtads frogatto frotz frozen-bubble* fruit funguloids* funnyboat gamazons game-data-packager gameclock gamine* garden-of-coloured-lights* gargoyle-free gav* gbrainy gcompris* gearhead* geekcode geki* gemdropx gemrb* geneatd gfceu gfpoken gl-117* glaurung glhack glines glob2* glpeces* gltron gmult gnect gnibbles gnobots2 gnome-breakout gnome-cards-data gnome-hearts gnome-klotski gnome-mahjongg gnome-mastermind gnome-mines gnome-nibbles gnome-robots gnome-sudoku gnome-tetravex gnomine gnotravex gnotski gnubg* gnubik gnuboy* gnudoq gnugo gnujump* gnuminishogi gnurobbo* gnurobots gnushogi golly gplanarity gpsshogi* granatier granule gravitation gravitywars greed grhino grhino-data gridlock.app groundhog gsalliere gtali gtans gtkballs gtkboard gtkboard gtkpool gunroar* gvrng gweled hachu hannah* hearse hedgewars* heroes* hex-a-hop hexalate hexxagon higan hitori hoichess holdingnuts holotz-castle* hyperrogue* iagno icebreaker ii-esu instead* ioquake3 jester jigzo* jmdlx jumpnbump* jzip kajongg kanagram kanatest kapman katomic kawari8 kball* kblackbox kblocks kbounce kbreakout kcheckers kdegames* kdiamond ketm* kfourinline kgoldrunner khangman kigo kiki-the-nano-bot* kildclient killbots kiriki kjumpingcube klickety klines kmahjongg kmines knavalbattle knetwalk knights kobodeluxe* kolf kollision komi konquest koules kpat krank kraptor* kreversi kshisen ksirk ksnakeduel kspaceduel ksquares ksudoku ktuberling kubrick laby late* lbreakout2* lgc-pg lgeneral* libatlas-cpp-0.6-tools libgemrb libretro-nestopia lierolibre* lightsoff lightyears lincity* linthesia liquidwar* littlewizard* llk-linux lmarbles lmemory lolcat londonlaw lordsawar* love* lskat ltris luola* lure-of-the-temptress macopix-gtk2 madbomber* maelstrom magicmaze magicor* magictouch mah-jong mahjongg mame* manaplus* mancala marsshooter* matanza mazeofgalious* mednafen megaglest* meritous* mess* mgt miceamaze micropolis* minetest* mirrormagic* mokomaze monopd monster-masher monsterz* moon-buggy* moon-lander* moria morris mousetrap mrrescue mttroff mu-cade* mudlet multitet mupen64plus* nestopia nethack* netmaze netpanzer* netris nettoe neverball* neverputt* nexuiz* ninix-aya ninvaders njam* noiz2sa* nsnake numptyphysics ogamesim* omega-rpg oneisenough oneko onscripter oolite* open-invaders* openarena* opencity* openclonk* openlugaru* openmw* openpref openssn* openttd* opentyrian openyahtzee orbital-eunuchs-sniper* out-of-order overgod* pachi pacman* palapeli* pangzero parsec47* passage pathogen pathological pax-britannica* pcsx2 pcsxr peg-e peg-solitaire pegsolitaire penguin-command pente pentobi performous* pescetti petris pgn-extract phalanx phlipple* pianobooster picmi pinball* pingus* pink-pony* pioneers* pipenightdreams* pixbros pixfrogger planarity plee-the-bear* pokerth* polygen* polyglot pong2 powder powermanga* pq prboom-plus* primrose projectl purity* pybik* pybridge* pykaraoke* pynagram pyracerz pyscrabble* pysiogame pysolfc* pysycache* python-pykaraoke python-renpy qgo qonk qstat qtads quadrapassel quake* quarry qxw rafkill* raincat* randtype rbdoom3bfg redeclipse* reminiscence renpy* residualvm* ri-li* rlvm robocode robotfindskitten rockdodger rocksndiamonds rolldice rott rrootage salliere sandboxgamemaker sauerbraten* scid* scorched3d* scottfree scummvm* sdl-ball* seahorse-adventures searchandrescue* sgt-puzzles shogivar* simutrans* singularity* sjaakii sjeng sl slashem* slimevolley* slingshot sm snake4 snowballz solarwolf sopwith spacearyarya spacezero speedpad spellcast sponc spout spring* starfighter* starvoyager* stax steam steamcmd stockfish stormbaancoureur* sudoku supertransball2* supertux* swell-foop tads3-common tagua* tali tanglet* tatan tdfsb tecnoballz* teeworlds* tenace tenmado tennix tetrinet* tetzle tf tf5 tictactoe-ng tint tintin++ tinymux titanion* toga2 tomatoes* tome toppler torcs* tourney-manager trackballs* transcend treil trigger-rally* triplane triplea trophy* tumiki-fighters* tuxfootball tuxmath* tuxpuck tuxtype* tworld* typespeed uci2wb ufoai* uhexen2* uligo unknown-horizons uqm* val-and-rick* vbaexpress vcmi vectoroids viruskiller visualboyadvance* vodovod warmux* warzone2100* wesnoth* whichwayisup widelands* wing* wizznic* wmpuzzle wolf4sdl wordplay wordwarvi* xabacus xball xbill xblast-tnt* xboard xbomb xbubble* xchain xdemineur xdesktopwaves xevil xfireworks xfishtank xflip xfrisk xgalaga* xgammon xinv3d xjig xjokes xjump xletters xmabacus xmahjongg xmoto* xmountains xmpuzzles xonix xpat2 xpenguins xphoon xpilot* xpuzzles xqf xracer* xscavenger xscorch xscreensaver-screensaver-dizzy xshisen xshogi xskat xsok xsol xsoldier xstarfish xsystem35 xteddy xtron xvier xwelltris xword xye yahtzeesharp yamagi-quake2* zangband* zatacka zaz* zec zivot zoom-player
+				apt-get purge -y 0ad* 2048-qt 7kaa* a7xpg* abe* aajm acm ace-of-penguins adanaxisgpl* adonthell* airstrike* aisleriot alex4* alien-arena* alienblaster* amoebax* amphetamine* an anagramarama* angband* angrydd animals antigravitaattori ardentryst armagetronad* asc asc-data asc-music astromenace* asylum* atanks* atom4 atomic* attal* auralquiz balder2d* ballerburg ballz* bambam barrage bastet bb bear-factory beneath-a-steel-sky berusky* between billard* biloba* biniax2* black-box blobandconquer* blobby* bloboats blobwars* blockattack blockout2 blocks-of-the-undead* bombardier bomber bomberclone* boswars* bouncy bovo brainparty* briquolo* bsdgames* btanks* bubbros bugsquish bumprace* burgerspace bve* openbve* bygfoot* bzflag* cappuccino cardstories castle-combat cavezofphear ceferino* cgoban *chess* childsplay* chipw chocolate* chromium-bsu* circuslinux* colobot* colorcode connectagram* cookietool *cowsay* crack-attack crafty* crawl* crimson criticalmass* crossfire* csmash* cube2* cultivation curseofwar cutemaze cuyo* cyphesis-cpp* cytadela* *x-rebirth dangen darkplaces* dds deal dealer defendguin* desmume deutex dhewm3* dizzy dodgindiamond2 dolphin-emu* doom-wad-shareware doomsday* dopewars* dossizola* drascula* dvorak7min eboard* edgar* efp einstein ember-media empire* endless-sky* enemylines* enigma* epiphany* etoys etw* excellent-bifurcation extremetuxracer* exult* fairymax fb-music-high ffrenzy fgo fgrun fheroes2-pkg filler fillets-ng* filters five-or-more fizmo* flare* flight-of-the-amazon-queen flightgear* flobopuyo fltk1.1-games fltk1.3-games fofix foobillard* fortune* four-in-a-row freealchemist freecell-solver-bin freeciv* freecol freedink* freedm freedoom freedroid* freegish freeorion* freespace2* freesweep freetennis* freevial fretsonfire* frobtads frogatto frotz frozen-bubble* fruit funguloids* funnyboat gamazons game-data-packager gameclock gamine* garden-of-coloured-lights* gargoyle-free gav* gbrainy gcompris* gearhead* geekcode geki* gemdropx gemrb* geneatd gfceu gfpoken gl-117* glaurung glhack glines glob2* glpeces* gltron gmult gnect gnibbles gnobots2 gnome-breakout gnome-cards-data gnome-hearts gnome-klotski gnome-mahjongg gnome-mastermind gnome-mines gnome-nibbles gnome-robots gnome-sudoku gnome-tetravex gnomine gnotravex gnotski gnubg* gnubik gnuboy* gnudoq gnugo gnujump* gnuminishogi gnurobbo* gnurobots gnushogi golly gplanarity gpsshogi* granatier granule gravitation gravitywars greed grhino grhino-data gridlock.app groundhog gsalliere gtali gtans gtkballs gtkboard gtkboard gtkpool gunroar* gvrng gweled hachu hannah* hearse hedgewars* heroes* hex-a-hop hexalate hexxagon higan hitori hoichess holdingnuts holotz-castle* hyperrogue* iagno icebreaker ii-esu instead* ioquake3 jester jigzo* jmdlx jumpnbump* jzip kajongg kanagram kanatest kapman katomic kawari8 kball* kblackbox kblocks kbounce kbreakout kcheckers kdegames* kdiamond ketm* kfourinline kgoldrunner khangman kigo kiki-the-nano-bot* kildclient killbots kiriki kjumpingcube klickety klines kmahjongg kmines knavalbattle knetwalk knights kobodeluxe* kolf kollision komi konquest koules kpat krank kraptor* kreversi kshisen ksirk ksnakeduel kspaceduel ksquares ksudoku ktuberling kubrick laby late* lbreakout2* lgc-pg lgeneral* libatlas-cpp-0.6-tools libgemrb libretro-nestopia lierolibre* lightsoff lightyears lincity* linthesia liquidwar* littlewizard* llk-linux lmarbles lmemory lolcat londonlaw lordsawar* love* lskat ltris luola* lure-of-the-temptress macopix-gtk2 madbomber* maelstrom magicmaze magicor* magictouch mah-jong mahjongg mame* manaplus* mancala marsshooter* matanza mazeofgalious* mednafen megaglest* meritous* mess* mgt miceamaze micropolis* minetest* mirrormagic* mokomaze monopd monster-masher monsterz* moon-buggy* moon-lander* moria morris mousetrap mrrescue mttroff mu-cade* mudlet multitet mupen64plus* nestopia nethack* netmaze netpanzer* netris nettoe neverball* neverputt* nexuiz* ninix-aya ninvaders njam* noiz2sa* nsnake numptyphysics ogamesim* omega-rpg oneisenough oneko onscripter oolite* open-invaders* openarena* opencity* openclonk* openlugaru* openmw* openpref openssn* openttd* opentyrian openyahtzee orbital-eunuchs-sniper* out-of-order overgod* pachi pacman* palapeli* pangzero parsec47* passage pathogen pathological pax-britannica* pcsx2 pcsxr peg-e peg-solitaire pegsolitaire penguin-command pente pentobi performous* pescetti petris pgn-extract phalanx phlipple* pianobooster picmi pinball* pingus* pink-pony* pioneers* pipenightdreams* pixbros pixfrogger planarity plee-the-bear* pokerth* polygen* polyglot pong2 powder powermanga* pq prboom-plus* primrose projectl purity* pybik* pybridge* pykaraoke* pynagram pyracerz pyscrabble* pysiogame pysolfc* pysycache* python-pykaraoke python-renpy qgo qonk qstat qtads quadrapassel quake* quarry qxw rafkill* raincat* randtype rbdoom3bfg redeclipse* reminiscence renpy* residualvm* ri-li* rlvm robocode robotfindskitten rockdodger rocksndiamonds rolldice rott rrootage salliere sandboxgamemaker sauerbraten* scid* scorched3d* scottfree scummvm* sdl-ball* seahorse-adventures searchandrescue* sgt-puzzles shogivar* simutrans* singularity* sjaakii sjeng sl slashem* slimevolley* slingshot sm snake4 snowballz solarwolf sopwith spacearyarya spacezero speedpad spellcast sponc spout spring* starfighter* starvoyager* stax steam steamcmd stockfish stormbaancoureur* sudoku supertransball2* supertux* swell-foop tads3-common tagua* tali tanglet* tatan tdfsb tecnoballz* teeworlds* tenace tenmado tennix tetrinet* tetzle tf tf5 tictactoe-ng tint tintin++ tinymux titanion* toga2 tomatoes* tome toppler torcs* tourney-manager trackballs* transcend treil trigger-rally* triplane triplea trophy* tumiki-fighters* tuxfootball tuxmath* tuxpuck tuxtype* tworld* typespeed uci2wb ufoai* uhexen2* uligo unknown-horizons uqm* val-and-rick* vbaexpress vcmi vectoroids viruskiller visualboyadvance* vodovod warmux* warzone2100* wesnoth* whichwayisup widelands* wing* wizznic* wmpuzzle wolf4sdl wordplay wordwarvi* xabacus xball xbill xblast-tnt* xboard xbomb xbubble* xchain xdemineur xdesktopwaves xevil xfireworks xfishtank xflip xfrisk xgalaga* xgammon xinv3d xjig xjokes xjump xletters xmabacus xmahjongg xmoto* xmountains xmpuzzles xonix xpat2 xpenguins xphoon xpilot* xpuzzles xqf xracer* xscavenger xscorch xscreensaver-screensaver-dizzy xshisen xshogi xskat xsok xsol xsoldier xstarfish xsystem35 xteddy xtron xvier xwelltris xword xye yahtzeesharp yamagi-quake2* zangband* zatacka zaz* zec zivot zoom-player -y
 			elif [ $OS = "2" ]
 			then
-				apt-get purge -y 0ad* 2048-qt 3dchess 4digits 7kaa* a7xpg* abe* aajm acm ace-of-penguins acm adanaxisgpl* adonthell* airstrike* aisleriot alex4* alien-arena* alienblaster* allure amoebax* amphetamine* an anagramarama* angband* angrydd animals antigravitaattori ardentryst armagetronad* asc asc-data asc-music asciijump assaultcube* astromenace* asylum* atanks* atom4 atomix* attal* auralquiz balder2d* ballerburg ballz* bambam barrage bastet bb bear-factory beneath-a-steel-sky berusky* between billard* biloba* biniax2* black-box blobandconquer* blobby* bloboats blobwars* blockattack blockout2 blocks-of-the-undead* bombardier bomber bomberclone* boswars* bouncy bovo brainparty* briquolo* bsdgames* btanks* bubbros bugsquish bumprace* burgerspace bve* openbve* bygfoot* bzflag* cappuccino caveexpress* cavepacker* cavezofphear ceferino* cgoban *chess* childsplay* chipw chocolate-common chocolate-doom chromium-bsu* circuslinux* colobot* colorcode colossal-cave-adventure connectagram* cookietool corsix-th* *cowsay* crack-attack crafty* crawl* crimson criticalmass* crossfire* crrcsim* csmash* cube2* cultivation curseofwar cutemaze cuyo* cyphesis-cpp* cytadela* *x-rebirth dangen darkplaces* ddnet* dds deal dealer defendguin* desmume deutex dhewm3* dizzy dodgindiamond2 dolphin-emu* doom-wad-shareware doomsday* dopewars* dossizola* drascula* dustracing2d* dvorak7min dwarf-fortress* eboard* edgar* efp einstein el-ixir ember ember-media empire* endless-sky* enemylines* enigma* epiphany* etoys etqw* etw* excellent-bifurcation extremetuxracer* exult* ezquake fairymax fb-music-high ffrenzy fgo fgrun fheroes2-pkg filler fillets-ng* filters five-or-more fizmo* flare* flight-of-the-amazon-queen flightgear* flobopuyo fltk1.1-games fltk1.3-games fofix foobillardplus* fortune* four-in-a-row freealchemist freecell-solver-bin freeciv* freecol freedink* freedm freedoom freedroid* freegish freeorion* freespace2* freesweep freetennis* freevial fretsonfire* frobtads frogatto frotz frozen-bubble* fruit funguloids* funnyboat gamazons game-data-packager gameclock gamine* garden-of-coloured-lights* gargoyle-free gav* gbrainy gcompris* gearhead* geekcode geki* gemdropx gemrb* geneatd gfceu gfpoken gl-117* glaurung glhack glines glob2* glpeces* gltron gmult gnect gnibbles gnobots2 gnome-breakout gnome-cards-data gnome-hearts gnome-klotski gnome-mahjongg gnome-mastermind gnome-mines gnome-nibbles gnome-robots gnome-sudoku gnome-tetravex gnomine gnotravex gnotski gnubg* gnubik gnuboy* gnudoq gnugo gnujump* gnuminishogi gnurobbo* gnurobots gnushogi golly gplanarity gpsshogi* granatier granule gravitation gravitywars greed grhino grhino-data gridlock.app groundhog gsalliere gtali gtans gtkballs gtkboard gtkboard gtkpool gunroar* gvrng gweled hachu hannah* hearse hedgewars* heroes* hex-a-hop hexalate hexxagon higan hitori hoichess holdingnuts holotz-castle* hyperrogue* iagno icebreaker ii-esu instead* ioquake3 jester jigzo* jmdlx jumpnbump* jzip kajongg kanagram kanatest kapman katomic kawari8 kball* kblackbox kblocks kbounce kbreakout kcheckers kdegames* kdiamond ketm* kfourinline kgoldrunner khangman kigo kiki-the-nano-bot* kildclient killbots kiriki kjumpingcube klickety klines kmahjongg kmines knavalbattle knetwalk knights kobodeluxe* kolf kollision komi konquest koules kpat krank kraptor* kreversi kshisen ksirk ksnakeduel kspaceduel ksquares ksudoku ktuberling kubrick laby late* lbreakout2* lgc-pg lgeneral* libatlas-cpp-0.6-tools libgemrb libretro-nestopia lierolibre* lightsoff lightyears lincity* linthesia liquidwar* littlewizard* llk-linux lmarbles lmemory lolcat londonlaw lordsawar* love* lskat ltris luola* lure-of-the-temptress macopix-gtk2 madbomber* maelstrom magicmaze magicor* magictouch mah-jong mahjongg mame* manaplus* mancala marsshooter* matanza mazeofgalious* mednafen megaglest* meritous* mess* mgt miceamaze micropolis* minetest* mirrormagic* mokomaze monopd monster-masher monsterz* moon-buggy* moon-lander* moria morris mousetrap mrrescue mttroff mu-cade* mudlet multitet mupen64plus* nestopia nethack* netmaze netpanzer* netris nettoe neverball* neverputt* nexuiz* ninix-aya ninvaders njam* noiz2sa* nsnake numptyphysics ogamesim* omega-rpg oneisenough oneko onscripter oolite* open-invaders* openarena* opencity* openclonk* openlugaru* openmw* openpref openssn* openttd* opentyrian openyahtzee orbital-eunuchs-sniper* out-of-order overgod* pachi pacman* palapeli* pangzero parsec47* passage pathogen pathological pax-britannica* pcsx2 pcsxr peg-e peg-solitaire pegsolitaire penguin-command pente pentobi performous* pescetti petris pgn-extract phalanx phlipple* pianobooster picmi pinball* pingus* pink-pony* pioneers* pipenightdreams* pixbros pixfrogger planarity plee-the-bear* pokerth* polygen* polyglot pong2 powder powermanga* pq prboom-plus* primrose projectl purity* pybik* pybridge* pykaraoke* pynagram pyracerz pyscrabble* pysiogame pysolfc* pysycache* python-pykaraoke python-renpy qgo qonk qstat qtads quadrapassel quake* quarry qxw rafkill* raincat* randtype rbdoom3bfg redeclipse* reminiscence renpy* residualvm* ri-li* rlvm robocode robotfindskitten rockdodger rocksndiamonds rolldice rott rrootage salliere sandboxgamemaker sauerbraten* scid* scorched3d* scottfree scummvm* sdl-ball* seahorse-adventures searchandrescue* sgt-puzzles shogivar* simutrans* singularity* sjaakii sjeng sl slashem* slimevolley* slingshot sm snake4 snowballz solarwolf sopwith spacearyarya spacezero speedpad spellcast sponc spout spring* starfighter* starvoyager* stax steam steamcmd stockfish stormbaancoureur* sudoku supertransball2* supertux* swell-foop tads3-common tagua* tali tanglet* tatan tdfsb tecnoballz* teeworlds* tenace tenmado tennix tetrinet* tetzle tf tf5 tictactoe-ng tint tintin++ tinymux titanion* toga2 tomatoes* tome toppler torcs* tourney-manager trackballs* transcend treil trigger-rally* triplane triplea trophy* tumiki-fighters* tuxfootball tuxmath* tuxpuck tuxtype* tworld* typespeed uci2wb ufoai* uhexen2* uligo unknown-horizons uqm* val-and-rick* vbaexpress vcmi vectoroids viruskiller visualboyadvance* vodovod warmux* warzone2100* wesnoth* whichwayisup widelands* wing* wizznic* wmpuzzle wolf4sdl wordplay wordwarvi* xabacus xball xbill xblast-tnt* xboard xbomb xbubble* xchain xdemineur xdesktopwaves xevil xfireworks xfishtank xflip xfrisk xgalaga* xgammon xinv3d xjig xjokes xjump xletters xmabacus xmahjongg xmoto* xmountains xmpuzzles xonix xpat2 xpenguins xphoon xpilot* xpuzzles xqf xracer* xscavenger xscorch xscreensaver-screensaver-dizzy xshisen xshogi xskat xsok xsol xsoldier xstarfish xsystem35 xteddy xtron xvier xwelltris xword xye yahtzeesharp yamagi-quake2* zangband* zatacka zaz* zec zivot zoom-player
+				apt-get purge -y 0ad* 2048-qt 3dchess 4digits 7kaa* a7xpg* abe* aajm acm ace-of-penguins acm adanaxisgpl* adonthell* airstrike* aisleriot alex4* alien-arena* alienblaster* allure amoebax* amphetamine* an anagramarama* angband* angrydd animals antigravitaattori ardentryst armagetronad* asc asc-data asc-music asciijump assaultcube* astromenace* asylum* atanks* atom4 atomix* attal* auralquiz balder2d* ballerburg ballz* bambam barrage bastet bb bear-factory beneath-a-steel-sky berusky* between billard* biloba* biniax2* black-box blobandconquer* blobby* bloboats blobwars* blockattack blockout2 blocks-of-the-undead* bombardier bomber bomberclone* boswars* bouncy bovo brainparty* briquolo* bsdgames* btanks* bubbros bugsquish bumprace* burgerspace bve* openbve* bygfoot* bzflag* cappuccino caveexpress* cavepacker* cavezofphear ceferino* cgoban *chess* childsplay* chipw chocolate-common chocolate-doom chromium-bsu* circuslinux* colobot* colorcode colossal-cave-adventure connectagram* cookietool corsix-th* *cowsay* crack-attack crafty* crawl* crimson criticalmass* crossfire* crrcsim* csmash* cube2* cultivation curseofwar cutemaze cuyo* cyphesis-cpp* cytadela* *x-rebirth dangen darkplaces* ddnet* dds deal dealer defendguin* desmume deutex dhewm3* dizzy dodgindiamond2 dolphin-emu* doom-wad-shareware doomsday* dopewars* dossizola* drascula* dustracing2d* dvorak7min dwarf-fortress* eboard* edgar* efp einstein el-ixir ember ember-media empire* endless-sky* enemylines* enigma* epiphany* etoys etqw* etw* excellent-bifurcation extremetuxracer* exult* ezquake fairymax fb-music-high ffrenzy fgo fgrun fheroes2-pkg filler fillets-ng* filters five-or-more fizmo* flare* flight-of-the-amazon-queen flightgear* flobopuyo fltk1.1-games fltk1.3-games fofix foobillardplus* fortune* four-in-a-row freealchemist freecell-solver-bin freeciv* freecol freedink* freedm freedoom freedroid* freegish freeorion* freespace2* freesweep freetennis* freevial fretsonfire* frobtads frogatto frotz frozen-bubble* fruit funguloids* funnyboat gamazons game-data-packager gameclock gamine* garden-of-coloured-lights* gargoyle-free gav* gbrainy gcompris* gearhead* geekcode geki* gemdropx gemrb* geneatd gfceu gfpoken gl-117* glaurung glhack glines glob2* glpeces* gltron gmult gnect gnibbles gnobots2 gnome-breakout gnome-cards-data gnome-hearts gnome-klotski gnome-mahjongg gnome-mastermind gnome-mines gnome-nibbles gnome-robots gnome-sudoku gnome-tetravex gnomine gnotravex gnotski gnubg* gnubik gnuboy* gnudoq gnugo gnujump* gnuminishogi gnurobbo* gnurobots gnushogi golly gplanarity gpsshogi* granatier granule gravitation gravitywars greed grhino grhino-data gridlock.app groundhog gsalliere gtali gtans gtkballs gtkboard gtkboard gtkpool gunroar* gvrng gweled hachu hannah* hearse hedgewars* heroes* hex-a-hop hexalate hexxagon higan hitori hoichess holdingnuts holotz-castle* hyperrogue* iagno icebreaker ii-esu instead* ioquake3 jester jigzo* jmdlx jumpnbump* jzip kajongg kanagram kanatest kapman katomic kawari8 kball* kblackbox kblocks kbounce kbreakout kcheckers kdegames* kdiamond ketm* kfourinline kgoldrunner khangman kigo kiki-the-nano-bot* kildclient killbots kiriki kjumpingcube klickety klines kmahjongg kmines knavalbattle knetwalk knights kobodeluxe* kolf kollision komi konquest koules kpat krank kraptor* kreversi kshisen ksirk ksnakeduel kspaceduel ksquares ksudoku ktuberling kubrick laby late* lbreakout2* lgc-pg lgeneral* libatlas-cpp-0.6-tools libgemrb libretro-nestopia lierolibre* lightsoff lightyears lincity* linthesia liquidwar* littlewizard* llk-linux lmarbles lmemory lolcat londonlaw lordsawar* love* lskat ltris luola* lure-of-the-temptress macopix-gtk2 madbomber* maelstrom magicmaze magicor* magictouch mah-jong mahjongg mame* manaplus* mancala marsshooter* matanza mazeofgalious* mednafen megaglest* meritous* mess* mgt miceamaze micropolis* minetest* mirrormagic* mokomaze monopd monster-masher monsterz* moon-buggy* moon-lander* moria morris mousetrap mrrescue mttroff mu-cade* mudlet multitet mupen64plus* nestopia nethack* netmaze netpanzer* netris nettoe neverball* neverputt* nexuiz* ninix-aya ninvaders njam* noiz2sa* nsnake numptyphysics ogamesim* omega-rpg oneisenough oneko onscripter oolite* open-invaders* openarena* opencity* openclonk* openlugaru* openmw* openpref openssn* openttd* opentyrian openyahtzee orbital-eunuchs-sniper* out-of-order overgod* pachi pacman* palapeli* pangzero parsec47* passage pathogen pathological pax-britannica* pcsx2 pcsxr peg-e peg-solitaire pegsolitaire penguin-command pente pentobi performous* pescetti petris pgn-extract phalanx phlipple* pianobooster picmi pinball* pingus* pink-pony* pioneers* pipenightdreams* pixbros pixfrogger planarity plee-the-bear* pokerth* polygen* polyglot pong2 powder powermanga* pq prboom-plus* primrose projectl purity* pybik* pybridge* pykaraoke* pynagram pyracerz pyscrabble* pysiogame pysolfc* pysycache* python-pykaraoke python-renpy qgo qonk qstat qtads quadrapassel quake* quarry qxw rafkill* raincat* randtype rbdoom3bfg redeclipse* reminiscence renpy* residualvm* ri-li* rlvm robocode robotfindskitten rockdodger rocksndiamonds rolldice rott rrootage salliere sandboxgamemaker sauerbraten* scid* scorched3d* scottfree scummvm* sdl-ball* seahorse-adventures searchandrescue* sgt-puzzles shogivar* simutrans* singularity* sjaakii sjeng sl slashem* slimevolley* slingshot sm snake4 snowballz solarwolf sopwith spacearyarya spacezero speedpad spellcast sponc spout spring* starfighter* starvoyager* stax steam steamcmd stockfish stormbaancoureur* sudoku supertransball2* supertux* swell-foop tads3-common tagua* tali tanglet* tatan tdfsb tecnoballz* teeworlds* tenace tenmado tennix tetrinet* tetzle tf tf5 tictactoe-ng tint tintin++ tinymux titanion* toga2 tomatoes* tome toppler torcs* tourney-manager trackballs* transcend treil trigger-rally* triplane triplea trophy* tumiki-fighters* tuxfootball tuxmath* tuxpuck tuxtype* tworld* typespeed uci2wb ufoai* uhexen2* uligo unknown-horizons uqm* val-and-rick* vbaexpress vcmi vectoroids viruskiller visualboyadvance* vodovod warmux* warzone2100* wesnoth* whichwayisup widelands* wing* wizznic* wmpuzzle wolf4sdl wordplay wordwarvi* xabacus xball xbill xblast-tnt* xboard xbomb xbubble* xchain xdemineur xdesktopwaves xevil xfireworks xfishtank xflip xfrisk xgalaga* xgammon xinv3d xjig xjokes xjump xletters xmabacus xmahjongg xmoto* xmountains xmpuzzles xonix xpat2 xpenguins xphoon xpilot* xpuzzles xqf xracer* xscavenger xscorch xscreensaver-screensaver-dizzy xshisen xshogi xskat xsok xsol xsoldier xstarfish xsystem35 xteddy xtron xvier xwelltris xword xye yahtzeesharp yamagi-quake2* zangband* zatacka zaz* zec zivot zoom-player -y
 			elif [ $OS = "3" ]
 			then
-				apt-get purge -y 0ad* 2048-qt 3dchess 4digits 7kaa* a7xpg* abe* aajm acm ace-of-penguins acm adanaxisgpl* adonthell* airstrike* aisleriot alex4* alien-arena* alienblaster* allure amoebax* amphetamine* an anagramarama* angband* angrydd animals antigravitaattori ardentryst armagetronad* asc asc-data asc-music asciijump assaultcube* astromenace* asylum* atanks* atom4 atomix* attal* auralquiz balder2d* ballerburg ballz* bambam barrage bastet bb bear-factory beneath-a-steel-sky berusky* between billard* biloba* biniax2* black-box blobandconquer* blobby* bloboats blobwars* blockattack blockout2 blocks-of-the-undead* bombardier bomber bomberclone* boswars* bouncy bovo brainparty* briquolo* bsdgames* btanks* bubbros bugsquish bumprace* burgerspace bve* openbve* bygfoot* bzflag* cappuccino caveexpress* cavepacker* cavezofphear ceferino* cgoban *chess* childsplay* chipw chocolate-common chocolate-doom chromium-bsu* circuslinux* colobot* colorcode colossal-cave-adventure connectagram* cookietool corsix-th* *cowsay* crack-attack crafty* crawl* crimson criticalmass* crossfire* crrcsim* csmash* cube2* cultivation curseofwar cutemaze cuyo* cyphesis-cpp* cytadela* *x-rebirth dangen darkplaces* ddnet* dds deal dealer defendguin* desmume deutex dhewm3* dizzy dodgindiamond2 dolphin-emu* doom-wad-shareware doomsday* dopewars* dossizola* drascula* dustracing2d* dvorak7min dwarf-fortress* eboard* edgar* efp einstein el-ixir ember ember-media empire* endless-sky* enemylines* enigma* epiphany* etoys etqw* etw* excellent-bifurcation extremetuxracer* exult* ezquake fairymax fb-music-high ffrenzy fgo fgrun fheroes2-pkg filler fillets-ng* filters five-or-more fizmo* flare* flight-of-the-amazon-queen flightgear* flobopuyo fltk1.1-games fltk1.3-games fofix foobillardplus* fortune* four-in-a-row freealchemist freecell-solver-bin freeciv* freecol freedink* freedm freedoom freedroid* freegish freeorion* freespace2* freesweep freetennis* freevial fretsonfire* frobtads frogatto frotz frozen-bubble* fruit funguloids* funnyboat gamazons game-data-packager gameclock gamine* garden-of-coloured-lights* gargoyle-free gav* gbrainy gcompris* gearhead* geekcode geki* gemdropx gemrb* geneatd gfceu gfpoken gl-117* glaurung glhack glines glob2* glpeces* gltron gmult gnect gnibbles gnobots2 gnome-breakout gnome-cards-data gnome-hearts gnome-klotski gnome-mahjongg gnome-mastermind gnome-mines gnome-nibbles gnome-robots gnome-sudoku gnome-tetravex gnomine gnotravex gnotski gnubg* gnubik gnuboy* gnudoq gnugo gnujump* gnuminishogi gnurobbo* gnurobots gnushogi golly gplanarity gpsshogi* granatier granule gravitation gravitywars greed grhino grhino-data gridlock.app groundhog gsalliere gtali gtans gtkballs gtkboard gtkboard gtkpool gunroar* gvrng gweled hachu hannah* hearse hedgewars* heroes* hex-a-hop hexalate hexxagon higan hitori hoichess holdingnuts holotz-castle* hyperrogue* iagno icebreaker ii-esu instead* ioquake3 jester jigzo* jmdlx jumpnbump* jzip kajongg kanagram kanatest kapman katomic kawari8 kball* kblackbox kblocks kbounce kbreakout kcheckers kdegames* kdiamond ketm* kfourinline kgoldrunner khangman kigo kiki-the-nano-bot* kildclient killbots kiriki kjumpingcube klickety klines kmahjongg kmines knavalbattle knetwalk knights kobodeluxe* kolf kollision komi konquest koules kpat krank kraptor* kreversi kshisen ksirk ksnakeduel kspaceduel ksquares ksudoku ktuberling kubrick laby late* lbreakout2* lgc-pg lgeneral* libatlas-cpp-0.6-tools libgemrb libretro-nestopia lierolibre* lightsoff lightyears lincity* linthesia liquidwar* littlewizard* llk-linux lmarbles lmemory lolcat londonlaw lordsawar* love* lskat ltris luola* lure-of-the-temptress macopix-gtk2 madbomber* maelstrom magicmaze magicor* magictouch mah-jong mahjongg mame* manaplus* mancala marsshooter* matanza mazeofgalious* mednafen megaglest* meritous* mess* mgt miceamaze micropolis* minetest* mirrormagic* mokomaze monopd monster-masher monsterz* moon-buggy* moon-lander* moria morris mousetrap mrrescue mttroff mu-cade* mudlet multitet mupen64plus* nestopia nethack* netmaze netpanzer* netris nettoe neverball* neverputt* nexuiz* ninix-aya ninvaders njam* noiz2sa* nsnake numptyphysics ogamesim* omega-rpg oneisenough oneko onscripter oolite* open-invaders* openarena* opencity* openclonk* openlugaru* openmw* openpref openssn* openttd* opentyrian openyahtzee orbital-eunuchs-sniper* out-of-order overgod* pachi pacman* palapeli* pangzero parsec47* passage pathogen pathological pax-britannica* pcsx2 pcsxr peg-e peg-solitaire pegsolitaire penguin-command pente pentobi performous* pescetti petris pgn-extract phalanx phlipple* pianobooster picmi pinball* pingus* pink-pony* pioneers* pipenightdreams* pixbros pixfrogger planarity plee-the-bear* pokerth* polygen* polyglot pong2 powder powermanga* pq prboom-plus* primrose projectl purity* pybik* pybridge* pykaraoke* pynagram pyracerz pyscrabble* pysiogame pysolfc* pysycache* python-pykaraoke python-renpy qgo qonk qstat qtads quadrapassel quake* quarry qxw rafkill* raincat* randtype rbdoom3bfg redeclipse* reminiscence renpy* residualvm* ri-li* rlvm robocode robotfindskitten rockdodger rocksndiamonds rolldice rott rrootage salliere sandboxgamemaker sauerbraten* scid* scorched3d* scottfree scummvm* sdl-ball* seahorse-adventures searchandrescue* sgt-puzzles shogivar* simutrans* singularity* sjaakii sjeng sl slashem* slimevolley* slingshot sm snake4 snowballz solarwolf sopwith spacearyarya spacezero speedpad spellcast sponc spout spring* starfighter* starvoyager* stax steam steamcmd stockfish stormbaancoureur* sudoku supertransball2* supertux* swell-foop tads3-common tagua* tali tanglet* tatan tdfsb tecnoballz* teeworlds* tenace tenmado tennix tetrinet* tetzle tf tf5 tictactoe-ng tint tintin++ tinymux titanion* toga2 tomatoes* tome toppler torcs* tourney-manager trackballs* transcend treil trigger-rally* triplane triplea trophy* tumiki-fighters* tuxfootball tuxmath* tuxpuck tuxtype* tworld* typespeed uci2wb ufoai* uhexen2* uligo unknown-horizons uqm* val-and-rick* vbaexpress vcmi vectoroids viruskiller visualboyadvance* vodovod warmux* warzone2100* wesnoth* whichwayisup widelands* wing* wizznic* wmpuzzle wolf4sdl wordplay wordwarvi* xabacus xball xbill xblast-tnt* xboard xbomb xbubble* xchain xdemineur xdesktopwaves xevil xfireworks xfishtank xflip xfrisk xgalaga* xgammon xinv3d xjig xjokes xjump xletters xmabacus xmahjongg xmoto* xmountains xmpuzzles xonix xpat2 xpenguins xphoon xpilot* xpuzzles xqf xracer* xscavenger xscorch xscreensaver-screensaver-dizzy xshisen xshogi xskat xsok xsol xsoldier xstarfish xsystem35 xteddy xtron xvier xwelltris xword xye yahtzeesharp yamagi-quake2* zangband* zatacka zaz* zec zivot zoom-player
+				apt-get purge -y 0ad* 2048-qt 3dchess 4digits 7kaa* a7xpg* abe* aajm acm ace-of-penguins acm adanaxisgpl* adonthell* airstrike* aisleriot alex4* alien-arena* alienblaster* allure amoebax* amphetamine* an anagramarama* angband* angrydd animals antigravitaattori ardentryst armagetronad* asc asc-data asc-music asciijump assaultcube* astromenace* asylum* atanks* atom4 atomix* attal* auralquiz balder2d* ballerburg ballz* bambam barrage bastet bb bear-factory beneath-a-steel-sky berusky* between billard* biloba* biniax2* black-box blobandconquer* blobby* bloboats blobwars* blockattack blockout2 blocks-of-the-undead* bombardier bomber bomberclone* boswars* bouncy bovo brainparty* briquolo* bsdgames* btanks* bubbros bugsquish bumprace* burgerspace bve* openbve* bygfoot* bzflag* cappuccino caveexpress* cavepacker* cavezofphear ceferino* cgoban *chess* childsplay* chipw chocolate-common chocolate-doom chromium-bsu* circuslinux* colobot* colorcode colossal-cave-adventure connectagram* cookietool corsix-th* *cowsay* crack-attack crafty* crawl* crimson criticalmass* crossfire* crrcsim* csmash* cube2* cultivation curseofwar cutemaze cuyo* cyphesis-cpp* cytadela* *x-rebirth dangen darkplaces* ddnet* dds deal dealer defendguin* desmume deutex dhewm3* dizzy dodgindiamond2 dolphin-emu* doom-wad-shareware doomsday* dopewars* dossizola* drascula* dustracing2d* dvorak7min dwarf-fortress* eboard* edgar* efp einstein el-ixir ember ember-media empire* endless-sky* enemylines* enigma* epiphany* etoys etqw* etw* excellent-bifurcation extremetuxracer* exult* ezquake fairymax fb-music-high ffrenzy fgo fgrun fheroes2-pkg filler fillets-ng* filters five-or-more fizmo* flare* flight-of-the-amazon-queen flightgear* flobopuyo fltk1.1-games fltk1.3-games fofix foobillardplus* fortune* four-in-a-row freealchemist freecell-solver-bin freeciv* freecol freedink* freedm freedoom freedroid* freegish freeorion* freespace2* freesweep freetennis* freevial fretsonfire* frobtads frogatto frotz frozen-bubble* fruit funguloids* funnyboat gamazons game-data-packager gameclock gamine* garden-of-coloured-lights* gargoyle-free gav* gbrainy gcompris* gearhead* geekcode geki* gemdropx gemrb* geneatd gfceu gfpoken gl-117* glaurung glhack glines glob2* glpeces* gltron gmult gnect gnibbles gnobots2 gnome-breakout gnome-cards-data gnome-hearts gnome-klotski gnome-mahjongg gnome-mastermind gnome-mines gnome-nibbles gnome-robots gnome-sudoku gnome-tetravex gnomine gnotravex gnotski gnubg* gnubik gnuboy* gnudoq gnugo gnujump* gnuminishogi gnurobbo* gnurobots gnushogi golly gplanarity gpsshogi* granatier granule gravitation gravitywars greed grhino grhino-data gridlock.app groundhog gsalliere gtali gtans gtkballs gtkboard gtkboard gtkpool gunroar* gvrng gweled hachu hannah* hearse hedgewars* heroes* hex-a-hop hexalate hexxagon higan hitori hoichess holdingnuts holotz-castle* hyperrogue* iagno icebreaker ii-esu instead* ioquake3 jester jigzo* jmdlx jumpnbump* jzip kajongg kanagram kanatest kapman katomic kawari8 kball* kblackbox kblocks kbounce kbreakout kcheckers kdegames* kdiamond ketm* kfourinline kgoldrunner khangman kigo kiki-the-nano-bot* kildclient killbots kiriki kjumpingcube klickety klines kmahjongg kmines knavalbattle knetwalk knights kobodeluxe* kolf kollision komi konquest koules kpat krank kraptor* kreversi kshisen ksirk ksnakeduel kspaceduel ksquares ksudoku ktuberling kubrick laby late* lbreakout2* lgc-pg lgeneral* libatlas-cpp-0.6-tools libgemrb libretro-nestopia lierolibre* lightsoff lightyears lincity* linthesia liquidwar* littlewizard* llk-linux lmarbles lmemory lolcat londonlaw lordsawar* love* lskat ltris luola* lure-of-the-temptress macopix-gtk2 madbomber* maelstrom magicmaze magicor* magictouch mah-jong mahjongg mame* manaplus* mancala marsshooter* matanza mazeofgalious* mednafen megaglest* meritous* mess* mgt miceamaze micropolis* minetest* mirrormagic* mokomaze monopd monster-masher monsterz* moon-buggy* moon-lander* moria morris mousetrap mrrescue mttroff mu-cade* mudlet multitet mupen64plus* nestopia nethack* netmaze netpanzer* netris nettoe neverball* neverputt* nexuiz* ninix-aya ninvaders njam* noiz2sa* nsnake numptyphysics ogamesim* omega-rpg oneisenough oneko onscripter oolite* open-invaders* openarena* opencity* openclonk* openlugaru* openmw* openpref openssn* openttd* opentyrian openyahtzee orbital-eunuchs-sniper* out-of-order overgod* pachi pacman* palapeli* pangzero parsec47* passage pathogen pathological pax-britannica* pcsx2 pcsxr peg-e peg-solitaire pegsolitaire penguin-command pente pentobi performous* pescetti petris pgn-extract phalanx phlipple* pianobooster picmi pinball* pingus* pink-pony* pioneers* pipenightdreams* pixbros pixfrogger planarity plee-the-bear* pokerth* polygen* polyglot pong2 powder powermanga* pq prboom-plus* primrose projectl purity* pybik* pybridge* pykaraoke* pynagram pyracerz pyscrabble* pysiogame pysolfc* pysycache* python-pykaraoke python-renpy qgo qonk qstat qtads quadrapassel quake* quarry qxw rafkill* raincat* randtype rbdoom3bfg redeclipse* reminiscence renpy* residualvm* ri-li* rlvm robocode robotfindskitten rockdodger rocksndiamonds rolldice rott rrootage salliere sandboxgamemaker sauerbraten* scid* scorched3d* scottfree scummvm* sdl-ball* seahorse-adventures searchandrescue* sgt-puzzles shogivar* simutrans* singularity* sjaakii sjeng sl slashem* slimevolley* slingshot sm snake4 snowballz solarwolf sopwith spacearyarya spacezero speedpad spellcast sponc spout spring* starfighter* starvoyager* stax steam steamcmd stockfish stormbaancoureur* sudoku supertransball2* supertux* swell-foop tads3-common tagua* tali tanglet* tatan tdfsb tecnoballz* teeworlds* tenace tenmado tennix tetrinet* tetzle tf tf5 tictactoe-ng tint tintin++ tinymux titanion* toga2 tomatoes* tome toppler torcs* tourney-manager trackballs* transcend treil trigger-rally* triplane triplea trophy* tumiki-fighters* tuxfootball tuxmath* tuxpuck tuxtype* tworld* typespeed uci2wb ufoai* uhexen2* uligo unknown-horizons uqm* val-and-rick* vbaexpress vcmi vectoroids viruskiller visualboyadvance* vodovod warmux* warzone2100* wesnoth* whichwayisup widelands* wing* wizznic* wmpuzzle wolf4sdl wordplay wordwarvi* xabacus xball xbill xblast-tnt* xboard xbomb xbubble* xchain xdemineur xdesktopwaves xevil xfireworks xfishtank xflip xfrisk xgalaga* xgammon xinv3d xjig xjokes xjump xletters xmabacus xmahjongg xmoto* xmountains xmpuzzles xonix xpat2 xpenguins xphoon xpilot* xpuzzles xqf xracer* xscavenger xscorch xscreensaver-screensaver-dizzy xshisen xshogi xskat xsok xsol xsoldier xstarfish xsystem35 xteddy xtron xvier xwelltris xword xye yahtzeesharp yamagi-quake2* zangband* zatacka zaz* zec zivot zoom-player -y
 			fi
 		fi
 		
 		echo "Installing security applications"
-		apt-get install gnupg
+		apt-get install gnupg -y
 	elif [ $task = "6" ]
 	then
 		read -p "Is FTP a critical service? (y/n) " FTPPrompt
@@ -483,24 +502,40 @@ t			touch /usr/lib/firefox/mozilla.cfg
 			echo "Invalid option"
 		fi
 
-		read -p "Is Apache a critical service? (y/n) " ApachePrompt
-		if [ $ApachePrompt = "y" ]
+		read -p "Do you require a web server? (y/n) " WebServerPrompt
+		if [ $WebServerPrompt = "y" ]
 		then
-			apt-get install apache2
 			ufw allow http
 			ufw allow https
-			groupadd -r apache
-			useradd apache -r -G apache -d /var/www -s /sbin/nologin
-			passwd -l apache
-			chown -R root:root /var/lock/apache2
-			chmod 740 /var/lock/apache2
-			chown -R root:root /var/run/apache2
-			chmod 740 /var/run/apache2
-			chown -R root:apache /var/log/apache2 
-			chmod 740 /var/log/apache2
-		elif [ $ApachePrompt = "n" ]
+			echo "What webserver application would you like to use?"
+			echo "1. Apache"
+			echo "2. Nginx"
+			echo "3. Other"
+			read -p "> " WebServerType
+			if [ $WebServerType = "1" ]
+			then
+				apt-get install apache2 -y
+				apt-get purge nginx* -y
+				groupadd -r apache
+				useradd apache -r -G apache -d /var/www -s /sbin/nologin
+				passwd -l apache
+				chown -R root:root /var/lock/apache2
+				chmod 740 /var/lock/apache2
+				chown -R root:root /var/run/apache2
+				chmod 740 /var/run/apache2
+				chown -R root:apache /var/log/apache2 
+				chmod 740 /var/log/apache2
+			fi
+			elif [ $WebServerType = "2" ]
+				apt-get install nginx -y
+			then
+				read -p "What application do you need to install for web server? " WebApp
+				apt-get install $WebApp -y
+			fi
+		elif [ $WebServerPrompt = "n" ]
 		then
-			apt-get purge apache2
+			apt-get purge apache2 -y
+			apt-get purge *nginx* -y
 			ufw deny http
 			ufw deny https
 			rm -r /var/www/*
@@ -511,15 +546,15 @@ t			touch /usr/lib/firefox/mozilla.cfg
 		read -p "Is Samba a critical service? (y/n) " SambaPrompt
 		if [ $SambaPrompt = "y" ]
 		then
-			apt-get install samba
+			apt-get install samba -y
 			ufw allow netbios-ns
 			ufw allow netbios-dgm
 			ufw allow netbios-ssn
 			ufw allow microsoft-ds
 		elif [ $SambaPrompt = "n" ]
 		then
-			apt-get purge samba*
-			apt-get purge smb
+			apt-get purge samba* -y
+			apt-get purge smb -y
 			ufw deny netbios-ns
 			ufw deny netbios-dgm
 			ufw deny netbios-ssn
@@ -531,11 +566,11 @@ t			touch /usr/lib/firefox/mozilla.cfg
 		read -p "Is DNS a critical service? (y/n) " DNSPrompt
 		if [ $DNSPrompt = "y" ]
 		then
-			apt-get install bind9
+			apt-get install bind9 -y
 			ufw allow domain
 		elif [ $DNSPrompt = "n" ]
 		then
-			apt-get purge bind9
+			apt-get purge bind9 -y
 			ufw deny domain
 		else
 			echo "Invalid option"
@@ -551,18 +586,18 @@ t			touch /usr/lib/firefox/mozilla.cfg
 			read -p "> " SQLPackage
 			if [ $SQLPackage = "1" ]
 			then
-				apt-get purge postgresql
-				apt-get install mysql-server
+				apt-get purge postgresql -y
+				apt-get install mysql-server -y
 				mysql_secure_installation
 				rewrite_file my.cnf /etc/mysql/my.cnf
 			elif [ $SQLPackage = "2" ]
 			then
-				apt-get purge mysql-server
-				apt-get install postgresql
+				apt-get purge mysql-server -y
+				apt-get install postgresql -y
 			elif [ $SQLPackage = "3" ]
 			then
 				read -p "Enter package name and look up how to secure it: " SQLApplication
-				apt-get install $SQLApplication
+				apt-get install $SQLApplication -y
 			else
 				echo "Invalid response"
 			fi
@@ -573,8 +608,8 @@ t			touch /usr/lib/firefox/mozilla.cfg
 			ufw deny mysql
 			ufw deny mysql-proxy
 			ufw deny postgresql
-			apt-get purge mysql*
-			apt-get purge postgresql
+			apt-get purge mysql* -y
+			apt-get purge postgresql -y
 		else
 			echo "Invalid option"
 		fi
@@ -582,12 +617,12 @@ t			touch /usr/lib/firefox/mozilla.cfg
 		read -p "Is Telnet a critical service? (y/n) " TelnetPrompt
 		if [ $TelnetPrompt = "y" ]
 		then
-			apt-get install telnet
+			apt-get install telnet -y
 			ufw allow telnet
 		elif [ $TelnetPrompt = "n" ]
 		then
-			apt-get purge telnet
-			apt-get purge telnetd
+			apt-get purge telnet -y
+			apt-get purge telnetd -y
 			ufw deny telnet
 		else
 			echo "Invalid option"
@@ -604,14 +639,14 @@ t			touch /usr/lib/firefox/mozilla.cfg
 			ufw allow pop3s
 		elif [ $mailPrompt = "n" ]
 		then
-			apt-get purge *dovecot*
-			apt-get purge chasquid
-			apt-get purge *cyrus*
-			apt-get purge gyrus
-			apt-get purge citadel-server citadel-suite
-			apt-get purge courier*
-			apt-get purge opensmtpd*
-			apt-get purge sqwebmail
+			apt-get purge *dovecot* -y
+			apt-get purge chasquid -y
+			apt-get purge *cyrus* -y
+			apt-get purge gyrus -y
+			apt-get purge citadel-server citadel-suite -y
+			apt-get purge courier* -y
+			apt-get purge opensmtpd* -y
+			apt-get purge sqwebmail -y
 			ufw deny smtp
 			ufw deny pop2
 			ufw deny pop3
@@ -638,7 +673,7 @@ t			touch /usr/lib/firefox/mozilla.cfg
 		fi
 	elif [ $task = "7" ]
 	then
-		apt-get install auditd
+		apt-get install auditd -y
 		auditctl -e 1
 		chown root:root /etc/audit
 		chmod 0700 /etc/audit
@@ -780,11 +815,11 @@ t			touch /usr/lib/firefox/mozilla.cfg
 		echo "root" > /etc/at.allow
 		
 		echo "Installing rootkit tools"
-		apt-get install chkrootkit
-		apt-get install rkhunter
+		apt-get install chkrootkit -y
+		apt-get install rkhunter -y
 		
 		echo "Installing antivirus"
-		apt-get install clamav
+		apt-get install clamav -y
 		freshclam
 		read -p "Do virus scan now(could take a while)? (y/n) " virusPrompt
 		if [ $virusPrompt = "y" ]
@@ -810,7 +845,7 @@ t			touch /usr/lib/firefox/mozilla.cfg
 		systemctl disable autofs
 		
 		echo "Setting up filesystem integrity checks(CIS 16 and 14 1.3.1)"
-		apt-get install aide aide-common
+		apt-get install aide aide-common -y
 		aideinit
 		
 		echo "Setting up boot security(CIS 16 and 14 1.4.1-2)"
@@ -835,10 +870,10 @@ t			touch /usr/lib/firefox/mozilla.cfg
 		sysctl -w kernel.randomize_va_space=2
 		
 		prelink -ua
-		apt-get purge prelink
+		apt-get purge prelink -y
 		
 		echo "Configuring AppArmor (CIS 16 1.6(not using selinux))"
-		apt-get install apparmor apparmor-profiles libpam-apparmor
+		apt-get install apparmor apparmor-profiles libpam-apparmor -y
 		aa-enforce /etc/apparmor.d/*
 		rewrite_file grub /etc/default/grub
 		
