@@ -387,7 +387,7 @@ t			touch /usr/lib/firefox/mozilla.cfg
 		if [ $OS = "1" ]
 		then
 			prelink -ua
-			apt-get purge -y aircrack-ng alien apktool autofs bruteforce* calife cewl cifer chiark-really cmospwd crack crack-common crack-md5 darkstat distributed-net *ettercap* fcrackzip gameconqueror hashcat* haskell-cracknum-utils hunt hydra* irpas *inetd inetutils* john* *kismet* labrea lcrack libghc-cracknum* libwiretap* logkeys *macchanger* medusa nast netsniff-ng *netcat* nfs-common nfs-kernel-server nis *nmap* ophcrack* pcredz pdfcrack portmap rarcrack rsh-server rpcbind sipcrack sniffit snmp snort* socat socket sucrack tftpd-hpa tshark vnc4server vncsnapshot vtgrab wireshark weplab yersinia *zeitgeist* -y
+			apt-get purge -y aircrack-ng alien apktool autofs bruteforce* bitstormlite bittornado bittorrent btfcheck btfs btpd buildtorrent calife cewl cifer chiark-really cmospwd crack crack-common crack-md5 ctorrent darkstat deluge* distributed-net *ettercap* fcrackzip gameconqueror hashcat* haskell-cracknum-utils hunt hydra* irpas *inetd inetutils* john* *kismet* ktorrent labrea lcrack libghc-cracknum* libghc-torrent* libwiretap* logkeys *macchanger* medusa mktorrent nast netsniff-ng *netcat* nfs-common nfs-kernel-server nis *nmap* ophcrack* pcredz pdfcrack portmap rarcrack rhash rsh-server rpcbind sipcrack sniffit snmp snort* socat socket sucrack tftpd-hpa tshark vnc4server vncsnapshot vtgrab wireshark weplab yersinia *zeitgeist* -y
 		elif [ $OS = "2" ]
 		then
 			prelink -ua
