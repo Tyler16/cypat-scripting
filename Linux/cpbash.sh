@@ -528,6 +528,7 @@ t			touch /usr/lib/firefox/mozilla.cfg
 			fi
 			elif [ $WebServerType = "2" ]
 				apt-get install nginx -y
+				apt-get purge apache2 -y
 			then
 				read -p "What application do you need to install for web server? " WebApp
 				apt-get install $WebApp -y
