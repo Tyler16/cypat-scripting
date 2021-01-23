@@ -172,7 +172,7 @@ do
 					then
 						echo "Deleting user $user"
 						deluser --force --remove-all-files $user
-					elif [ $deleteUserPrompt = "n" ]
+					elif [ $deleteUserLowUIDPrompt = "n" ]
 					then
 						read -p "Change UID to be greater than 1000 (y/n)" changeUIDPrompt
 						if [ $changeUIDPrompt = "y" ]
@@ -183,7 +183,6 @@ do
 							userID=$newID
 							((initialIDDifference++))
 						fi
-					else
 					fi
 				fi
 			done
@@ -394,7 +393,7 @@ t			touch /usr/lib/firefox/mozilla.cfg
 			apt-get purge -y acccheck aircrack-ng alien apktool argon2 autofs bruteforce* calife cewl chiark-really cmospwd crack crack-common crack-md5 cupp cupp3 *ettercap* fcrackzip gameconqueror hydra* hashcat* irpas *inetd inetutils* john* *kismet* lcrack libargon2-0* *macchanger* maskprocessor medusa ncrack *netcat* nfs-common nfs-kernel-server nis *nmap* ophcrack* patator pcredz pdfcrack portmap princeprocessor rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot vtgrab wfuzz wireshark yersinia *zeitgeist* -y
 		elif [ $OS = "3" ]
 		then
-			apt-get purge -y acccheck aircrack-ng alien apktool argon2 autofs bruteforce* calife cewl chiark-really cmospwd crack crack-common crack-md5 cupp cupp3 *ettercap* fcrackzip gameconqueror hydra* hashcat* *inetd inetutils* john* *kismet* lcrack libargon2-0* *macchanger* maskprocessor medusa ncrack *netcat* nfs-common nfs-kernel-server nis *nmap* ophcrack* patator pdfcrack portmap princeprocessor rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot wfuzz wireshark yersinia *zeitgeist* -y
+			apt-get purge -y aircrack-ng alien apktool argon2 autofs bruteforce* calife cewl chiark-really cmospwd crack crack-common crack-md5 cupp cupp3 *ettercap* fcrackzip gameconqueror hydra* hashcat* *inetd inetutils* john* *kismet* lcrack libargon2-0* *macchanger* maskprocessor medusa ncrack *netcat* nfs-common nfs-kernel-server nis *nmap* ophcrack* patator pdfcrack portmap rarcrack rsh-server rpcbind sipcrack snmp socat socket sucrack tftpd-hpa vnc4server vncsnapshot wfuzz wireshark yersinia *zeitgeist* -y
 		fi
 		
 		read -p "Would you like to remove every game for the system? (y/n): " gamePrompt
@@ -525,11 +524,11 @@ t			touch /usr/lib/firefox/mozilla.cfg
 				chmod 740 /var/run/apache2
 				chown -R root:apache /var/log/apache2 
 				chmod 740 /var/log/apache2
-			fi
 			elif [ $WebServerType = "2" ]
+			then
 				apt-get install nginx -y
 				apt-get purge apache2 -y
-			then
+			else
 				read -p "What application do you need to install for web server? " WebApp
 				apt-get install $WebApp -y
 			fi
