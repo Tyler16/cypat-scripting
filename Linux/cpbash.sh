@@ -86,7 +86,12 @@ do
 			chmod 0640 /etc/apt/apt.conf.d/20auto-upgrades
 		elif [ $OS = "3" ]
 		then
-			echo "Create files dumas"
+			rewrite_file ubuntu20Sources.list /etc/apt/sources.list
+			chmod 0640 /etc/apt/sources.list
+			rewrite_file 10periodic /etc/apt/apt.conf.d/10periodic
+			chmod 0640 /etc/apt/apt.conf.d/10periodic
+			rewrite_file ubuntu20auto-upgrades /etc/apt/apt.conf.d/20auto-upgrades
+			chmod 0640 /etc/apt/apt.conf.d/20auto-upgrades
 		elif [ $OS = "4" ]
 		then
 			rewrite_file debianSources.list /etc/apt/sources.list
