@@ -1,6 +1,6 @@
-<h1>Cypat Scripting</h1>
+# Cypat Scripting
 This repository contains scripts used for the cyberpatriot competition to automatically set security policies on Linux and Windows systems. Now that my team and I have been out of Cyberpatriot for 2 years, it is now publicized for everyone.
-<h2>Features</h2>
+## Features
 These scripts contain a number of features, including:
 -Separate code for different Linux distributions
 -User management and auditing system
